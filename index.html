@@ -27,9 +27,7 @@
     };
   </script>
   <style>
-    :root {
-      color-scheme: dark;
-    }
+    :root { color-scheme: dark; }
     body {
       background-color: #090d16;
       color: #f1f5f9;
@@ -54,7 +52,39 @@
 </head>
 <body class="min-h-screen bg-[#090d16] text-slate-100 antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
 
-  <!-- TOP BAR -->
+  <!-- ==================== TELA DE LOGIN / ACESSO (DO CÓDIGO ANTIGO) ==================== -->
+  <div id="loginScreen" class="fixed inset-0 z-50 hidden items-center justify-center bg-[#090d16]/95 p-4 backdrop-blur">
+    <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-[#111827] p-6 shadow-2xl space-y-5">
+      <div class="flex items-center gap-3">
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-blue-600 font-bold text-slate-950">
+          AF
+        </div>
+        <div>
+          <h2 class="text-lg font-bold text-white">AMFIN ERP — Acesso ao Sistema</h2>
+          <p class="text-xs text-slate-400">Acesso Master / Operador ou Perfil Cliente</p>
+        </div>
+      </div>
+
+      <form onsubmit="AMFIN.handleLogin(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="mb-1 block text-slate-300">Usuário / E-mail *</label>
+          <input id="loginUser" type="text" required placeholder="master@amfin.com ou usuario" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-white focus:border-emerald-500 focus:outline-none" />
+        </div>
+        <div>
+          <label class="mb-1 block text-slate-300">Senha / Chave de Acesso *</label>
+          <input id="loginPass" type="password" required placeholder="••••••••" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-white focus:border-emerald-500 focus:outline-none" />
+        </div>
+        <div class="flex items-center justify-between pt-1">
+          <span id="loginRoleBadge" class="text-[11px] text-slate-400">Padrão Master inicial: master / amfin123</span>
+          <button type="submit" class="rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-slate-950 hover:bg-emerald-400">
+            Entrar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== TOP BAR ==================== -->
   <header class="sticky top-0 z-30 border-b border-slate-800/90 bg-[#0b111e]/95 backdrop-blur">
     <div class="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-3 px-4 py-3">
       <div class="flex items-center gap-3">
@@ -67,8 +97,11 @@
             <span class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-300">
               BPO &amp; Contabilidade
             </span>
+            <span id="activeSessionBadge" class="rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-[11px] font-medium text-blue-300">
+              Sessão: Master
+            </span>
           </div>
-          <p class="text-xs text-slate-400">Gestão Financeira • Fluxo Passado/Futuro • Supabase REST</p>
+          <p class="text-xs text-slate-400">Gestão Financeira • Fluxo Passado/Futuro • Lotes .TXT • Supabase REST</p>
         </div>
       </div>
 
@@ -93,19 +126,29 @@
           + Novo Lançamento
         </button>
 
-        <button onclick="AMFIN.openModal('modalCliente')" class="rounded-lg border border-blue-500/40 bg-blue-500/15 px-3 py-1.5 text-xs font-semibold text-blue-300 transition hover:bg-blue-500/25">
+        <button id="btnAddCliente" onclick="AMFIN.openModal('modalCliente')" class="rounded-lg border border-blue-500/40 bg-blue-500/15 px-3 py-1.5 text-xs font-semibold text-blue-300 transition hover:bg-blue-500/25">
           + Cliente
+        </button>
+
+        <button onclick="AMFIN.openLoginModal()" class="rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-800" title="Trocar Usuário / Acesso">
+          🔐 Acesso
         </button>
       </div>
     </div>
 
-    <!-- NAVIGATION TABS -->
+    <!-- NAVIGATION TABS (NOVAS + ANTIGAS UNIFICADAS) -->
     <nav class="mx-auto flex max-w-[1440px] gap-1.5 overflow-x-auto border-t border-slate-800/60 px-4 py-2">
       <button data-tab="relatorios" onclick="AMFIN.switchTab('relatorios')" class="tab-btn active shrink-0 rounded-lg border border-transparent px-3.5 py-2 text-xs font-semibold text-slate-300 transition hover:bg-slate-800/70">
         📊 Relatórios Automáticos
       </button>
       <button data-tab="lancamentos" onclick="AMFIN.switchTab('lancamentos')" class="tab-btn shrink-0 rounded-lg border border-transparent px-3.5 py-2 text-xs font-semibold text-slate-300 transition hover:bg-slate-800/70">
         💸 Lançamentos &amp; Pagar/Receber
+      </button>
+      <button data-tab="aprovacao" onclick="AMFIN.switchTab('aprovacao')" class="tab-btn shrink-0 rounded-lg border border-transparent px-3.5 py-2 text-xs font-semibold text-slate-300 transition hover:bg-slate-800/70">
+        ✅ Fila de Aprovação
+      </button>
+      <button data-tab="lotes" onclick="AMFIN.switchTab('lotes')" class="tab-btn shrink-0 rounded-lg border border-transparent px-3.5 py-2 text-xs font-semibold text-slate-300 transition hover:bg-slate-800/70">
+        📤 Gerador de Lotes (.TXT)
       </button>
       <button data-tab="naturezas" onclick="AMFIN.switchTab('naturezas')" class="tab-btn shrink-0 rounded-lg border border-transparent px-3.5 py-2 text-xs font-semibold text-slate-300 transition hover:bg-slate-800/70">
         🏷️ Naturezas de Operação
@@ -114,10 +157,13 @@
         🔄 Conciliação Bancária (.TXT)
       </button>
       <button data-tab="contabilidade" onclick="AMFIN.switchTab('contabilidade')" class="tab-btn shrink-0 rounded-lg border border-transparent px-3.5 py-2 text-xs font-semibold text-slate-300 transition hover:bg-slate-800/70">
-        📘 Contabilidade &amp; Razão
+        📘 Contabilidade, DRE &amp; Razão
       </button>
       <button data-tab="bancaria" onclick="AMFIN.switchTab('bancaria')" class="tab-btn shrink-0 rounded-lg border border-transparent px-3.5 py-2 text-xs font-semibold text-slate-300 transition hover:bg-slate-800/70">
         🏦 Área Bancária &amp; Investimentos
+      </button>
+      <button data-tab="acessos" onclick="AMFIN.switchTab('acessos')" class="tab-btn shrink-0 rounded-lg border border-transparent px-3.5 py-2 text-xs font-semibold text-slate-300 transition hover:bg-slate-800/70">
+        🔑 Liberação de Acessos
       </button>
     </nav>
   </header>
@@ -186,13 +232,9 @@
         </div>
       </div>
 
-      <!-- KPI CARDS -->
       <div id="kpiGrid" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"></div>
-
-      <!-- SECONDARY KPI ROW (AP / AR / BANK / INVEST) -->
       <div id="kpiSubGrid" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"></div>
 
-      <!-- CHARTS ROW 1 -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div class="rounded-xl border border-slate-800 bg-[#111827] p-4">
           <div class="mb-3 flex items-center justify-between">
@@ -211,7 +253,6 @@
         </div>
       </div>
 
-      <!-- CHARTS ROW 2 -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div class="rounded-xl border border-slate-800 bg-[#111827] p-4">
           <div class="mb-3 flex items-center justify-between">
@@ -230,7 +271,6 @@
         </div>
       </div>
 
-      <!-- SUMMARY TABLE BY NATUREZA -->
       <div class="rounded-xl border border-slate-800 bg-[#111827] p-4">
         <h2 class="mb-3 text-sm font-semibold text-white">Resumo Consolidado por Natureza de Operação</h2>
         <div class="overflow-x-auto">
@@ -256,7 +296,7 @@
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 class="text-xl font-bold text-white">Lançamentos, Contas a Pagar e Contas a Receber</h1>
-          <p class="text-xs text-slate-400">Suporta datas passadas, atuais e futuras (parcelas, vencimentos, provisões), natureza de operação e status de pagamento/recebimento.</p>
+          <p class="text-xs text-slate-400">Suporta datas passadas, atuais e futuras (parcelas, vencimentos, provisões), centro de custo, natureza de operação e status.</p>
         </div>
         <div class="flex flex-wrap gap-2">
           <button onclick="AMFIN.openModal('modalLancamento', 'PAGAR')" class="rounded-lg border border-rose-500/40 bg-rose-500/15 px-3 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/25">
@@ -274,7 +314,6 @@
         </div>
       </div>
 
-      <!-- SUB-FILTERS FOR LAUNCHES -->
       <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800 bg-[#111827] p-3">
         <div class="flex flex-wrap items-center gap-2 text-xs">
           <button onclick="AMFIN.setLancFilter('ALL')" id="lfALL" class="lf-btn rounded-lg bg-slate-800 px-3 py-1.5 font-semibold text-emerald-300">Todos</button>
@@ -291,7 +330,6 @@
         </div>
       </div>
 
-      <!-- LAUNCHES TABLE -->
       <div class="rounded-xl border border-slate-800 bg-[#111827] p-4">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
@@ -314,7 +352,55 @@
       </div>
     </section>
 
-    <!-- ==================== TAB 3: NATUREZAS DE OPERAÇÃO ==================== -->
+    <!-- ==================== TAB 3 (ANTIGA): FILA DE APROVAÇÃO ==================== -->
+    <section id="tab-aprovacao" class="tab-panel hidden space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-bold text-white">Fila de Aprovação Financeira</h1>
+          <p class="text-xs text-slate-400">Aprove ou rejeite lançamentos pendentes antes da liquidação ou geração de lotes bancários.</p>
+        </div>
+      </div>
+      <div class="rounded-xl border border-slate-800 bg-[#111827] p-4">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="border-b border-slate-800 text-slate-400">
+              <tr>
+                <th class="py-2.5 px-3">Data</th>
+                <th class="py-2.5 px-3">Fluxo</th>
+                <th class="py-2.5 px-3">Descrição</th>
+                <th class="py-2.5 px-3">Aprovação</th>
+                <th class="py-2.5 px-3 text-right">Valor</th>
+                <th class="py-2.5 px-3 text-center">Decisão</th>
+              </tr>
+            </thead>
+            <tbody id="aprovacaoTableBody" class="divide-y divide-slate-800/70 tabular-nums"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4 (ANTIGA): GERADOR DE LOTES .TXT ==================== -->
+    <section id="tab-lotes" class="tab-panel hidden space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-bold text-white">Gerador de Lotes Bancários (.TXT)</h1>
+          <p class="text-xs text-slate-400">Selecione lançamentos a pagar/receber no período e exporte um arquivo de lote em formato .TXT.</p>
+        </div>
+        <button onclick="AMFIN.generateBatchTxt()" class="rounded-lg bg-emerald-500 px-4 py-2 text-xs font-semibold text-slate-950 hover:bg-emerald-400">
+          ⬇ Baixar Lote (.TXT)
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 space-y-2 max-h-[420px] overflow-y-auto" id="batchCandidatesList"></div>
+        <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 space-y-2">
+          <div class="text-xs font-semibold text-slate-300">Prévia do Arquivo de Lote (.TXT)</div>
+          <pre id="batchTxtPreview" class="h-80 overflow-auto rounded-lg border border-slate-800 bg-slate-950 p-3 font-mono text-[11px] text-emerald-300"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: NATUREZAS DE OPERAÇÃO ==================== -->
     <section id="tab-naturezas" class="tab-panel hidden space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -345,7 +431,7 @@
       </div>
     </section>
 
-    <!-- ==================== TAB 4: CONCILIAÇÃO BANCÁRIA (.TXT) ==================== -->
+    <!-- ==================== TAB 6: CONCILIAÇÃO BANCÁRIA (.TXT) ==================== -->
     <section id="tab-conciliacao" class="tab-panel hidden space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -362,7 +448,6 @@
         </div>
       </div>
 
-      <!-- BANK SELECTOR & TXT UPLOAD -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 space-y-3">
           <label class="block text-xs font-semibold text-slate-300">1. Selecione o Banco / Conta Bancária</label>
@@ -380,10 +465,9 @@
           </div>
           <input id="txtStatementInput" type="file" accept=".txt,text/plain" onchange="AMFIN.handleTxtFileUpload(event)" class="block w-full cursor-pointer rounded-lg border border-dashed border-slate-700 bg-slate-950/60 p-2.5 text-xs text-slate-300 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-500/20 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-emerald-300 hover:file:bg-emerald-500/30" />
           <p class="text-[11px] text-slate-400">
-            Aceita linhas como <code class="text-slate-300">21/11/2026 | Recebimento Cliente XPTO | 1500,00 | Saldo: 12500,00</code>, <code class="text-slate-300">2026-11-20;Pagamento Energia;-320.50</code> ou CSV/OFX-texto simples.
+            Aceita linhas como <code class="text-slate-300">21/11/2026 | Recebimento Cliente XPTO | 1500,00 | Saldo: 12500,00</code>, <code class="text-slate-300">2026-11-20;Pagamento Energia;-320.50</code> ou CSV/texto simples.
           </p>
 
-          <!-- PREVIEW BEFORE CONCILING -->
           <div id="txtPreviewBox" class="hidden rounded-lg border border-emerald-500/30 bg-slate-950/80 p-3 space-y-2">
             <div class="flex items-center justify-between">
               <span id="txtPreviewTitle" class="text-xs font-semibold text-emerald-300">Pré-visualização do Extrato (.TXT)</span>
@@ -413,9 +497,7 @@
         </div>
       </div>
 
-      <!-- SIDE BY SIDE RECONCILIATION -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <!-- LEFT: BANK STATEMENT (.TXT) ITEMS -->
         <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 space-y-3">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-semibold text-white">Movimentações do Extrato (.TXT)</h2>
@@ -424,7 +506,6 @@
           <div id="extStatementList" class="space-y-2 max-h-[520px] overflow-y-auto pr-1"></div>
         </div>
 
-        <!-- RIGHT: ERP LAUNCHES FOR SELECTED BANK -->
         <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 space-y-3">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-semibold text-white">Lançamentos do ERP (Banco Selecionado)</h2>
@@ -435,12 +516,12 @@
       </div>
     </section>
 
-    <!-- ==================== TAB 5: CONTABILIDADE COMPLETA ==================== -->
+    <!-- ==================== TAB 7: CONTABILIDADE, DRE & RAZÃO ==================== -->
     <section id="tab-contabilidade" class="tab-panel hidden space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 class="text-xl font-bold text-white">Contabilidade Completa &amp; Livro Razão</h1>
-          <p class="text-xs text-slate-400">Plano de Contas, Partidas Dobradas, Livro Diário, Livro Razão por conta/período e Balancete/DRE Gerencial.</p>
+          <h1 class="text-xl font-bold text-white">Contabilidade Completa, DRE &amp; Livro Razão</h1>
+          <p class="text-xs text-slate-400">Plano de Contas, Centros de Custo, Partidas Dobradas, Livro Diário, Livro Razão por conta/período e Balancete/DRE Gerencial.</p>
         </div>
         <div class="flex flex-wrap gap-2">
           <button onclick="AMFIN.openModal('modalContaContabil')" class="rounded-lg border border-blue-500/40 bg-blue-500/15 px-3 py-2 text-xs font-semibold text-blue-300 hover:bg-blue-500/25">
@@ -458,7 +539,6 @@
         </div>
       </div>
 
-      <!-- SUB-TABS -->
       <div class="flex flex-wrap gap-2">
         <button data-subtab="razao" onclick="AMFIN.switchContabSubtab('razao')" class="subtab-btn active rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-300">
           Livro Razão
@@ -467,14 +547,13 @@
           Livro Diário
         </button>
         <button data-subtab="plano" onclick="AMFIN.switchContabSubtab('plano')" class="subtab-btn rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-300">
-          Plano de Contas
+          Plano de Contas &amp; Centros de Custo
         </button>
         <button data-subtab="balancete" onclick="AMFIN.switchContabSubtab('balancete')" class="subtab-btn rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-300">
           Balancete &amp; DRE Gerencial
         </button>
       </div>
 
-      <!-- SUBTAB 1: LIVRO RAZÃO -->
       <div id="subtab-razao" class="contab-subpanel rounded-xl border border-slate-800 bg-[#111827] p-4 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex flex-wrap items-center gap-2">
@@ -502,7 +581,6 @@
         </div>
       </div>
 
-      <!-- SUBTAB 2: LIVRO DIÁRIO -->
       <div id="subtab-diario" class="contab-subpanel hidden rounded-xl border border-slate-800 bg-[#111827] p-4 space-y-3">
         <h2 class="text-sm font-semibold text-white">Livro Diário (Ordem Cronológica)</h2>
         <div class="overflow-x-auto">
@@ -522,8 +600,7 @@
         </div>
       </div>
 
-      <!-- SUBTAB 3: PLANO DE CONTAS -->
-      <div id="subtab-plano" class="contab-subpanel hidden rounded-xl border border-slate-800 bg-[#111827] p-4 space-y-3">
+      <div id="subtab-plano" class="contab-subpanel hidden rounded-xl border border-slate-800 bg-[#111827] p-4 space-y-4">
         <h2 class="text-sm font-semibold text-white">Plano de Contas</h2>
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
@@ -538,9 +615,13 @@
             <tbody id="planoTableBody" class="divide-y divide-slate-800/70"></tbody>
           </table>
         </div>
+
+        <div class="border-t border-slate-800 pt-3">
+          <h3 class="mb-2 text-xs font-semibold text-slate-300">Centros de Custo</h3>
+          <div id="centrosCustoList" class="flex flex-wrap gap-2 text-xs"></div>
+        </div>
       </div>
 
-      <!-- SUBTAB 4: BALANCETE & DRE GERENCIAL -->
       <div id="subtab-balancete" class="contab-subpanel hidden space-y-4">
         <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 space-y-3">
           <h2 class="text-sm font-semibold text-white">Balancete de Verificação (Período Filtrado)</h2>
@@ -568,7 +649,7 @@
       </div>
     </section>
 
-    <!-- ==================== TAB 6: ÁREA BANCÁRIA & INVESTIMENTOS ==================== -->
+    <!-- ==================== TAB 8: ÁREA BANCÁRIA & INVESTIMENTOS ==================== -->
     <section id="tab-bancaria" class="tab-panel hidden space-y-5">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -591,13 +672,11 @@
         </div>
       </div>
 
-      <!-- BANK ACCOUNTS SECTION -->
       <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 space-y-3">
         <h2 class="text-sm font-semibold text-white">Contas Bancárias Cadastradas</h2>
         <div id="bankAccountsGrid" class="grid grid-cols-1 gap-3 md:grid-cols-3 tabular-nums"></div>
       </div>
 
-      <!-- INVESTMENTS SECTION -->
       <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <h2 class="text-sm font-semibold text-white">Carteira de Investimentos</h2>
@@ -622,6 +701,44 @@
               </tr>
             </thead>
             <tbody id="investimentosTableBody" class="divide-y divide-slate-800/70 tabular-nums"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 9 (ANTIGA): LIBERAÇÃO DE ACESSOS ==================== -->
+    <section id="tab-acessos" class="tab-panel hidden space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-bold text-white">Liberação de Acessos (Master / Cliente)</h1>
+          <p class="text-xs text-slate-400">Gerencie usuários e permissões de acesso aos clientes do AMFIN ERP.</p>
+        </div>
+      </div>
+
+      <form onsubmit="AMFIN.saveAccessUser(event)" class="grid grid-cols-1 gap-3 rounded-xl border border-slate-800 bg-[#111827] p-4 text-xs sm:grid-cols-4">
+        <input id="accUserLogin" type="text" required placeholder="Usuário / E-mail" class="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-white" />
+        <input id="accUserPass" type="text" required placeholder="Senha" class="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-white" />
+        <select id="accUserRole" class="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-white">
+          <option value="MASTER">Master (Acesso Total)</option>
+          <option value="CLIENTE">Cliente (Visão Restrita)</option>
+        </select>
+        <button type="submit" class="rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-slate-950 hover:bg-emerald-400">
+          + Liberar Acesso
+        </button>
+      </form>
+
+      <div class="rounded-xl border border-slate-800 bg-[#111827] p-4">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="border-b border-slate-800 text-slate-400">
+              <tr>
+                <th class="py-2.5 px-3">Usuário</th>
+                <th class="py-2.5 px-3">Perfil</th>
+                <th class="py-2.5 px-3">Status</th>
+                <th class="py-2.5 px-3 text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="acessosTableBody" class="divide-y divide-slate-800/70"></tbody>
           </table>
         </div>
       </div>
@@ -672,7 +789,7 @@
     </div>
   </div>
 
-  <!-- MODAL NOVO LANÇAMENTO (PAGAR / RECEBER / MOVIMENTAÇÃO) -->
+  <!-- MODAL NOVO LANÇAMENTO -->
   <div id="modalLancamento" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
     <div class="w-full max-w-lg rounded-2xl border border-slate-700 bg-[#111827] p-5 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -859,7 +976,7 @@
     </div>
   </div>
 
-  <!-- MODAL LANÇAMENTO CONTÁBIL (PARTIDAS DOBRADAS) -->
+  <!-- MODAL LANÇAMENTO CONTÁBIL -->
   <div id="modalLancamentoContabil" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
     <div class="w-full max-w-lg rounded-2xl border border-slate-700 bg-[#111827] p-5 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -998,10 +1115,6 @@
 
   <!-- ==================== MODULAR JAVASCRIPT ARCHITECTURE ==================== -->
   <script>
-    /**
-     * AMFIN ERP — Arquitetura Modular com Compatibilidade Retroativa e Supabase REST
-     * Tabela esperada: public.amfin_workspaces (workspace_id, payload, updated_at)
-     */
     const AMFIN = (() => {
       const STORAGE_KEY = 'AMFIN_ERP_STATE_V1';
       const LEGACY_KEYS = ['AMFIN_ERP_DATA', 'amfin_erp_state', 'amfin_state', 'AMFIN_DATA'];
@@ -1029,10 +1142,7 @@
 
       function todayISO() {
         const d = new Date();
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       }
 
       function addDaysISO(baseISO, days) {
@@ -1042,16 +1152,14 @@
       }
 
       function formatBRL(val) {
-        const num = Number(val) || 0;
-        return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        return (Number(val) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
       }
 
       function formatDateBR(iso) {
         if (!iso) return '-';
         const clean = String(iso).slice(0, 10);
         const [y, m, d] = clean.split('-');
-        if (!y || !m || !d) return iso;
-        return `${d}/${m}/${y}`;
+        return (!y || !m || !d) ? iso : `${d}/${m}/${y}`;
       }
 
       function escapeHtml(str) {
@@ -1067,16 +1175,13 @@
         if (!box) return;
         box.textContent = msg;
         box.className = `fixed bottom-4 right-4 z-[60] max-w-sm rounded-xl border px-4 py-3 text-xs font-medium shadow-2xl ${
-          isError
-            ? 'border-rose-500/50 bg-rose-950/95 text-rose-200'
-            : 'border-emerald-500/40 bg-slate-900/95 text-emerald-200'
+          isError ? 'border-rose-500/50 bg-rose-950/95 text-rose-200' : 'border-emerald-500/40 bg-slate-900/95 text-emerald-200'
         }`;
         box.classList.remove('hidden');
         clearTimeout(showToast._timer);
         showToast._timer = setTimeout(() => box.classList.add('hidden'), 3600);
       }
 
-      // ==================== DEFAULT SEED DATA ====================
       function getDefaultPlanAccounts() {
         return [
           { id: 'acc_1101', codigo: '1.1.01', nome: 'Caixa e Bancos Movimento', grupo: 'ATIVO', natureza: 'DEVEDORA', saldoInicial: 0 },
@@ -1107,6 +1212,7 @@
             { id: 'bnk_itau', nome: 'Itaú Empresas', agencia: '0001', conta: '45890-1', saldoInicial: 8500.00 },
             { id: 'bnk_nubank', nome: 'Nubank PJ', agencia: '0001', conta: '99812-0', saldoInicial: 4200.00 }
           ],
+          centrosCusto: ['Administrativo', 'Operacional', 'Comercial'],
           naturezas: getDefaultNaturezas(),
           lancamentos: [
             {
@@ -1117,6 +1223,7 @@
               naturezaId: 'nat_serv',
               bancoId: 'bnk_itau',
               status: 'PAGO',
+              aprovacao: 'APROVADO',
               valor: 3800.00,
               conciliado: true
             },
@@ -1128,6 +1235,7 @@
               naturezaId: 'nat_fixa',
               bancoId: 'bnk_nubank',
               status: 'PAGO',
+              aprovacao: 'APROVADO',
               valor: 420.00,
               conciliado: false
             },
@@ -1139,6 +1247,7 @@
               naturezaId: 'nat_serv',
               bancoId: 'bnk_itau',
               status: 'PENDENTE',
+              aprovacao: 'PENDENTE',
               valor: 2650.00,
               conciliado: false
             },
@@ -1150,6 +1259,7 @@
               naturezaId: 'nat_forn',
               bancoId: 'bnk_itau',
               status: 'PENDENTE',
+              aprovacao: 'PENDENTE',
               valor: 1150.00,
               conciliado: false
             }
@@ -1157,51 +1267,18 @@
           contabilidade: {
             contas: getDefaultPlanAccounts(),
             lancamentosContabeis: [
-              {
-                id: 'lc_1',
-                data: addDaysISO(base, -10),
-                historico: 'Reconhecimento receita de serviços BPO',
-                debitoId: 'acc_1101',
-                creditoId: 'acc_4101',
-                valor: 3800.00
-              },
-              {
-                id: 'lc_2',
-                data: addDaysISO(base, -5),
-                historico: 'Despesa administrativa mensal',
-                debitoId: 'acc_6101',
-                creditoId: 'acc_1101',
-                valor: 420.00
-              }
+              { id: 'lc_1', data: addDaysISO(base, -10), historico: 'Reconhecimento receita de serviços BPO', debitoId: 'acc_1101', creditoId: 'acc_4101', valor: 3800.00 },
+              { id: 'lc_2', data: addDaysISO(base, -5), historico: 'Despesa administrativa mensal', debitoId: 'acc_6101', creditoId: 'acc_1101', valor: 420.00 }
             ]
           },
           investimentos: [
-            {
-              id: 'inv_1',
-              nome: 'CDB Liquidez Diária 102% CDI',
-              tipo: 'CDB',
-              instituicao: 'XP / Itaú',
-              dataAplicacao: addDaysISO(base, -45),
-              dataVencimento: addDaysISO(base, 320),
-              valorAplicado: 5000.00,
-              valorAtual: 5215.00
-            },
-            {
-              id: 'inv_2',
-              nome: 'Tesouro Selic 2029',
-              tipo: 'Tesouro Direto',
-              instituicao: 'XP',
-              dataAplicacao: addDaysISO(base, -90),
-              dataVencimento: addDaysISO(base, 900),
-              valorAplicado: 3000.00,
-              valorAtual: 3180.00
-            }
+            { id: 'inv_1', nome: 'CDB Liquidez Diária 102% CDI', tipo: 'CDB', instituicao: 'XP / Itaú', dataAplicacao: addDaysISO(base, -45), dataVencimento: addDaysISO(base, 320), valorAplicado: 5000.00, valorAtual: 5215.00 },
+            { id: 'inv_2', nome: 'Tesouro Selic 2029', tipo: 'Tesouro Direto', instituicao: 'XP', dataAplicacao: addDaysISO(base, -90), dataVencimento: addDaysISO(base, 900), valorAplicado: 3000.00, valorAtual: 3180.00 }
           ],
           extratoImportado: {}
         };
       }
 
-      // ==================== 100% BACKWARD COMPATIBLE MERGE ====================
       function normalizeClientPayload(rawClient, fallbackName, fallbackSeg) {
         const base = createDefaultClientData(fallbackName, fallbackSeg);
         if (!rawClient || typeof rawClient !== 'object') return base;
@@ -1217,7 +1294,6 @@
           : base.bancos;
 
         const defaultBankId = bancos[0].id;
-
         const rawContas = Array.isArray(rawClient.contabilidade?.contas) && rawClient.contabilidade.contas.length > 0
           ? rawClient.contabilidade.contas
           : base.contabilidade.contas;
@@ -1245,7 +1321,6 @@
         }));
 
         const defaultNatId = naturezas[0]?.id || 'nat_serv';
-
         const rawLancs = Array.isArray(rawClient.lancamentos)
           ? rawClient.lancamentos
           : (Array.isArray(rawClient.movimentacoes) ? rawClient.movimentacoes : base.lancamentos);
@@ -1254,11 +1329,7 @@
           const val = Math.abs(Number(l.valor ?? l.amount ?? 0) || 0);
           let fluxo = l.fluxo || l.tipo;
           if (!['PAGAR', 'RECEBER'].includes(fluxo)) {
-            if (l.tipo === 'SAIDA' || l.tipo === 'DESPESA' || Number(l.valor) < 0) {
-              fluxo = 'PAGAR';
-            } else {
-              fluxo = 'RECEBER';
-            }
+            fluxo = (l.tipo === 'SAIDA' || l.tipo === 'DESPESA' || Number(l.valor) < 0) ? 'PAGAR' : 'RECEBER';
           }
           return {
             id: l.id || `lnc_old_${idx}_${Math.random().toString(36).slice(2, 6)}`,
@@ -1268,6 +1339,7 @@
             naturezaId: l.naturezaId || l.natureza || defaultNatId,
             bancoId: l.bancoId || l.banco || defaultBankId,
             status: l.status || 'PENDENTE',
+            aprovacao: l.aprovacao || 'PENDENTE',
             valor: val,
             conciliado: Boolean(l.conciliado)
           };
@@ -1305,6 +1377,7 @@
 
         return {
           bancos,
+          centrosCusto: Array.isArray(rawClient.centrosCusto) && rawClient.centrosCusto.length ? rawClient.centrosCusto : base.centrosCusto,
           naturezas,
           lancamentos,
           contabilidade: { contas, lancamentosContabeis },
@@ -1316,6 +1389,11 @@
       function normalizeState(raw) {
         const now = new Date();
         const defaultState = {
+          session: { user: 'master', role: 'MASTER' },
+          acessos: [
+            { id: 'usr_master', user: 'master', pass: 'amfin123', role: 'MASTER', ativo: true },
+            { id: 'usr_cliente', user: 'cliente', pass: 'cliente123', role: 'CLIENTE', ativo: true }
+          ],
           activeClientId: 'cli_principal',
           period: {
             month: String(now.getMonth() + 1).padStart(2, '0'),
@@ -1352,16 +1430,15 @@
           clientes = defaultState.clientes;
         }
 
-        const activeClientId = clientes.some(c => c.id === raw.activeClientId)
-          ? raw.activeClientId
-          : clientes[0].id;
-
-        const month = raw.period?.month || defaultState.period.month;
-        const year = raw.period?.year || defaultState.period.year;
-
+        const activeClientId = clientes.some(c => c.id === raw.activeClientId) ? raw.activeClientId : clientes[0].id;
         return {
+          session: raw.session || defaultState.session,
+          acessos: Array.isArray(raw.acessos) && raw.acessos.length ? raw.acessos : defaultState.acessos,
           activeClientId,
-          period: { month, year },
+          period: {
+            month: raw.period?.month || defaultState.period.month,
+            year: raw.period?.year || defaultState.period.year
+          },
           clientes
         };
       }
@@ -1374,31 +1451,20 @@
           if (!parsed) {
             for (const k of LEGACY_KEYS) {
               const oldVal = localStorage.getItem(k);
-              if (oldVal) {
-                parsed = JSON.parse(oldVal);
-                break;
-              }
+              if (oldVal) { parsed = JSON.parse(oldVal); break; }
             }
           }
-        } catch (e) {
-          console.warn('Erro ao ler estado local:', e);
-        }
+        } catch (e) { console.warn('Erro ao ler estado local:', e); }
         state = normalizeState(parsed);
 
         try {
           const savedCfg = JSON.parse(localStorage.getItem(CLOUD_CONFIG_KEY) || 'null');
           cloudConfig = { ...DEFAULT_CLOUD_CONFIG, ...(savedCfg || {}) };
-        } catch {
-          cloudConfig = { ...DEFAULT_CLOUD_CONFIG };
-        }
+        } catch { cloudConfig = { ...DEFAULT_CLOUD_CONFIG }; }
       }
 
       function saveLocalOnly() {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        } catch (e) {
-          console.error('Falha ao salvar no localStorage:', e);
-        }
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { console.error(e); }
       }
 
       function getCurrentClient() {
@@ -1409,7 +1475,147 @@
         return getCurrentClient().data;
       }
 
-      // ==================== SUPABASE REST (amfin_workspaces) ====================
+      // ==================== LOGIN & ACESSOS (DO CÓDIGO ANTIGO) ====================
+      function openLoginModal() {
+        document.getElementById('loginScreen')?.classList.remove('hidden');
+        document.getElementById('loginScreen')?.classList.add('flex');
+      }
+
+      function handleLogin(e) {
+        e.preventDefault();
+        const u = document.getElementById('loginUser').value.trim();
+        const p = document.getElementById('loginPass').value;
+        const found = (state.acessos || []).find(a => a.ativo !== false && a.user.toLowerCase() === u.toLowerCase() && a.pass === p);
+        if (!found) {
+          showToast('Usuário ou senha inválidos.', true);
+          return;
+        }
+        state.session = { user: found.user, role: found.role };
+        saveLocalOnly();
+        document.getElementById('loginScreen')?.classList.add('hidden');
+        document.getElementById('loginScreen')?.classList.remove('flex');
+        renderAll();
+        showToast(`Bem-vindo, ${found.user} (${found.role}).`);
+      }
+
+      async function saveAccessUser(e) {
+        e.preventDefault();
+        state.acessos.push({
+          id: `usr_${Date.now()}`,
+          user: document.getElementById('accUserLogin').value.trim(),
+          pass: document.getElementById('accUserPass').value,
+          role: document.getElementById('accUserRole').value,
+          ativo: true
+        });
+        e.target.reset();
+        renderAcessos();
+        await pushToCloud(true);
+      }
+
+      async function toggleAccessUser(id) {
+        const u = state.acessos.find(x => x.id === id);
+        if (!u || u.id === 'usr_master') return;
+        u.ativo = u.ativo === false ? true : false;
+        renderAcessos();
+        await pushToCloud(false);
+      }
+
+      function renderAcessos() {
+        const tbody = document.getElementById('acessosTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = (state.acessos || []).map(a => `
+          <tr class="hover:bg-slate-800/40">
+            <td class="py-2 px-3 font-medium text-white">${escapeHtml(a.user)}</td>
+            <td class="py-2 px-3"><span class="rounded bg-blue-500/15 px-2 py-0.5 text-[11px] text-blue-300">${escapeHtml(a.role)}</span></td>
+            <td class="py-2 px-3">${a.ativo !== false ? '<span class="text-emerald-300">Ativo</span>' : '<span class="text-rose-300">Inativo</span>'}</td>
+            <td class="py-2 px-3 text-center">
+              ${a.id !== 'usr_master' ? `<button onclick="AMFIN.toggleAccessUser('${a.id}')" class="text-xs text-slate-300 hover:underline">Alternar</button>` : '<span class="text-slate-500">Master</span>'}
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      // ==================== FILA DE APROVAÇÃO & LOTES .TXT ====================
+      async function setApprovalStatus(id, status) {
+        const d = getClientData();
+        const item = d.lancamentos.find(l => l.id === id);
+        if (!item) return;
+        item.aprovacao = status;
+        renderAll();
+        await pushToCloud(false);
+      }
+
+      function renderAprovacao() {
+        const d = getClientData();
+        const tbody = document.getElementById('aprovacaoTableBody');
+        if (!tbody) return;
+        const rows = (d.lancamentos || []).filter(l => matchesPeriodAndHorizon(l.data));
+        tbody.innerHTML = rows.length === 0
+          ? `<tr><td colspan="6" class="py-5 text-center text-slate-400">Sem lançamentos no período.</td></tr>`
+          : rows.map(l => `
+              <tr class="hover:bg-slate-800/40">
+                <td class="py-2 px-3">${formatDateBR(l.data)}</td>
+                <td class="py-2 px-3 ${l.fluxo === 'RECEBER' ? 'text-emerald-300' : 'text-rose-300'}">${l.fluxo}</td>
+                <td class="py-2 px-3 font-medium text-white">${escapeHtml(l.descricao)}</td>
+                <td class="py-2 px-3"><span class="rounded bg-slate-800 px-2 py-0.5 text-[11px]">${escapeHtml(l.aprovacao || 'PENDENTE')}</span></td>
+                <td class="py-2 px-3 text-right font-semibold">${formatBRL(l.valor)}</td>
+                <td class="py-2 px-3 text-center space-x-2">
+                  <button onclick="AMFIN.setApprovalStatus('${l.id}', 'APROVADO')" class="rounded bg-emerald-500/20 px-2 py-1 text-emerald-300 hover:bg-emerald-500/30">Aprovar</button>
+                  <button onclick="AMFIN.setApprovalStatus('${l.id}', 'REJEITADO')" class="rounded bg-rose-500/20 px-2 py-1 text-rose-300 hover:bg-rose-500/30">Rejeitar</button>
+                </td>
+              </tr>
+            `).join('');
+      }
+
+      function renderBatchLotes() {
+        const d = getClientData();
+        const listEl = document.getElementById('batchCandidatesList');
+        const prevEl = document.getElementById('batchTxtPreview');
+        if (!listEl || !prevEl) return;
+
+        const rows = (d.lancamentos || []).filter(l => matchesPeriodAndHorizon(l.data));
+        listEl.innerHTML = rows.map(l => `
+          <label class="flex items-center justify-between gap-2 rounded-lg border border-slate-800 bg-slate-950/60 p-2.5 text-xs">
+            <span class="flex items-center gap-2">
+              <input type="checkbox" checked data-batch-id="${l.id}" onchange="AMFIN.refreshBatchPreview()" class="h-4 w-4 rounded border-slate-700 bg-slate-900 text-emerald-500" />
+              <span>${formatDateBR(l.data)} • <strong>${escapeHtml(l.descricao)}</strong> (${l.fluxo})</span>
+            </span>
+            <span class="font-semibold tabular-nums">${formatBRL(l.valor)}</span>
+          </label>
+        `).join('');
+        refreshBatchPreview();
+      }
+
+      function refreshBatchPreview() {
+        const d = getClientData();
+        const prevEl = document.getElementById('batchTxtPreview');
+        if (!prevEl) return;
+        const checkedIds = Array.from(document.querySelectorAll('[data-batch-id]:checked')).map(el => el.dataset.batchId);
+        const selected = (d.lancamentos || []).filter(l => checkedIds.includes(l.id));
+        const lines = [
+          `HEADER|AMFIN_ERP|${getCurrentClient().nome}|${todayISO()}|QTD=${selected.length}`,
+          ...selected.map(l => `${formatDateBR(l.data)}|${l.fluxo}|${(Number(l.valor) || 0).toFixed(2).replace('.', ',')}|${l.descricao}`),
+          `TRAILER|TOTAL=${selected.reduce((s, x) => s + (Number(x.valor) || 0), 0).toFixed(2).replace('.', ',')}`
+        ];
+        prevEl.textContent = lines.join('\n');
+      }
+
+      function generateBatchTxt() {
+        refreshBatchPreview();
+        const content = document.getElementById('batchTxtPreview')?.textContent || '';
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `AMFIN_Lote_${todayISO()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast('Lote .TXT gerado com sucesso!');
+      }
+
+      // ==================== SUPABASE REST ====================
       function setCloudBadge(status, label) {
         const dot = document.getElementById('cloudDot');
         const txt = document.getElementById('cloudStatusText');
@@ -1430,29 +1636,17 @@
           setCloudBadge('warn', 'Nuvem Não Configurada');
           return;
         }
-        const baseUrl = cleanBaseUrl(cloudConfig.url);
-        const endpoint = `${baseUrl}/rest/v1/amfin_workspaces?workspace_id=eq.${encodeURIComponent(cloudConfig.workspaceId)}&select=workspace_id,payload,updated_at`;
+        const endpoint = `${cleanBaseUrl(cloudConfig.url)}/rest/v1/amfin_workspaces?workspace_id=eq.${encodeURIComponent(cloudConfig.workspaceId)}&select=workspace_id,payload,updated_at`;
         try {
           const res = await fetch(endpoint, {
             method: 'GET',
-            headers: {
-              apikey: cloudConfig.anonKey,
-              Authorization: `Bearer ${cloudConfig.anonKey}`,
-              Accept: 'application/json'
-            }
+            headers: { apikey: cloudConfig.anonKey, Authorization: `Bearer ${cloudConfig.anonKey}`, Accept: 'application/json' }
           });
-          if (!res.ok) {
-            setCloudBadge('error', `Erro Nuvem (${res.status})`);
-            return;
-          }
+          if (!res.ok) { setCloudBadge('error', `Erro Nuvem (${res.status})`); return; }
           const rows = await res.json();
           if (Array.isArray(rows) && rows.length > 0 && rows[0].payload) {
             const merged = normalizeState(rows[0].payload);
-            // Preserve local period if user changed it, merge clients safely
-            state = {
-              ...merged,
-              period: state.period || merged.period
-            };
+            state = { ...merged, period: state.period || merged.period };
             saveLocalOnly();
           }
           setCloudBadge('online', 'Nuvem Online');
@@ -1469,13 +1663,8 @@
           if (showFeedback) showToast('Salvo localmente. Configure o Supabase para sincronizar na nuvem.');
           return;
         }
-        const baseUrl = cleanBaseUrl(cloudConfig.url);
-        const endpoint = `${baseUrl}/rest/v1/amfin_workspaces?on_conflict=workspace_id`;
-        const body = [{
-          workspace_id: cloudConfig.workspaceId.trim(),
-          payload: state,
-          updated_at: new Date().toISOString()
-        }];
+        const endpoint = `${cleanBaseUrl(cloudConfig.url)}/rest/v1/amfin_workspaces?on_conflict=workspace_id`;
+        const body = [{ workspace_id: cloudConfig.workspaceId.trim(), payload: state, updated_at: new Date().toISOString() }];
         try {
           const res = await fetch(endpoint, {
             method: 'POST',
@@ -1488,8 +1677,6 @@
             body: JSON.stringify(body)
           });
           if (!res.ok) {
-            const errTxt = await res.text();
-            console.error('Supabase POST error:', res.status, errTxt);
             setCloudBadge('error', `Erro Nuvem (${res.status})`);
             if (showFeedback) showToast(`Erro ao enviar para nuvem (${res.status}).`, true);
             return;
@@ -1497,7 +1684,7 @@
           setCloudBadge('online', 'Nuvem Online');
           if (showFeedback) showToast('Sincronizado com Supabase (amfin_workspaces)!');
         } catch (err) {
-          console.error('Supabase network error:', err);
+          console.error('Supabase POST error:', err);
           setCloudBadge('error', 'Erro Nuvem');
           if (showFeedback) showToast('Falha de rede ao conectar ao Supabase.', true);
         }
@@ -1537,7 +1724,7 @@
         showToast('Sincronização em nuvem desativada; dados permanecem salvos localmente.');
       }
 
-      // ==================== TEMPORAL FILTERS (PAST / PRESENT / FUTURE) ====================
+      // ==================== TEMPORAL FILTERS ====================
       function populateYearSelect() {
         const sel = document.getElementById('filterYear');
         if (!sel) return;
@@ -1549,12 +1736,7 @@
         (d.lancamentos || []).forEach(l => { if (l.data?.length >= 4) years.add(l.data.slice(0, 4)); });
         (d.contabilidade?.lancamentosContabeis || []).forEach(l => { if (l.data?.length >= 4) years.add(l.data.slice(0, 4)); });
 
-        const sorted = Array.from(years).sort((a, b) => {
-          if (a === 'ALL') return -1;
-          if (b === 'ALL') return 1;
-          return Number(b) - Number(a);
-        });
-
+        const sorted = Array.from(years).sort((a, b) => a === 'ALL' ? -1 : (b === 'ALL' ? 1 : Number(b) - Number(a)));
         const prevVal = state.period?.year || String(currentY);
         sel.innerHTML = sorted.map(y => `<option value="${y}">${y === 'ALL' ? 'Todos os anos' : y}</option>`).join('');
         sel.value = sorted.includes(prevVal) ? prevVal : 'ALL';
@@ -1574,9 +1756,7 @@
           btn.className = 'horizon-btn rounded-md px-2.5 py-1 font-medium text-slate-400 hover:text-slate-200';
         });
         const activeBtn = document.getElementById(`horizon${h}`);
-        if (activeBtn) {
-          activeBtn.className = 'horizon-btn rounded-md bg-slate-800 px-2.5 py-1 font-semibold text-emerald-300';
-        }
+        if (activeBtn) activeBtn.className = 'horizon-btn rounded-md bg-slate-800 px-2.5 py-1 font-semibold text-emerald-300';
         renderAll();
       }
 
@@ -1600,11 +1780,8 @@
       }
 
       function getDateHorizon(isoDate) {
-        const today = todayISO();
         if (!isoDate) return 'REALIZED';
-        const d = String(isoDate).slice(0, 10);
-        if (d > today) return 'FUTURE';
-        return 'REALIZED';
+        return String(isoDate).slice(0, 10) > todayISO() ? 'FUTURE' : 'REALIZED';
       }
 
       function matchesPeriodAndHorizon(isoDate) {
@@ -1612,7 +1789,6 @@
         const [y, m] = clean.split('-');
         if (state.period.year !== 'ALL' && y !== state.period.year) return false;
         if (state.period.month !== 'ALL' && m !== state.period.month) return false;
-
         const h = getDateHorizon(clean);
         if (activeHorizon === 'REALIZED' && h !== 'REALIZED') return false;
         if (activeHorizon === 'FUTURE' && h !== 'FUTURE') return false;
@@ -1634,21 +1810,15 @@
       // ==================== NAVIGATION & MODALS ====================
       function switchTab(tabName) {
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
-        const target = document.getElementById(`tab-${tabName}`);
-        if (target) target.classList.remove('hidden');
-
-        document.querySelectorAll('.tab-btn').forEach(b => {
-          b.classList.toggle('active', b.dataset.tab === tabName);
-        });
+        document.getElementById(`tab-${tabName}`)?.classList.remove('hidden');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
         renderAll();
       }
 
       function switchContabSubtab(sub) {
         document.querySelectorAll('.contab-subpanel').forEach(p => p.classList.add('hidden'));
         document.getElementById(`subtab-${sub}`)?.classList.remove('hidden');
-        document.querySelectorAll('.subtab-btn').forEach(b => {
-          b.classList.toggle('active', b.dataset.subtab === sub);
-        });
+        document.querySelectorAll('.subtab-btn').forEach(b => b.classList.toggle('active', b.dataset.subtab === sub));
         renderContabilidade();
       }
 
@@ -1663,12 +1833,8 @@
             onLancFluxoChange();
           }
         }
-        if (id === 'modalLancamentoContabil') {
-          document.getElementById('lcData').value = todayISO();
-        }
-        if (id === 'modalInvestimento') {
-          document.getElementById('invDataAplicacao').value = todayISO();
-        }
+        if (id === 'modalLancamentoContabil') document.getElementById('lcData').value = todayISO();
+        if (id === 'modalInvestimento') document.getElementById('invDataAplicacao').value = todayISO();
         el.classList.remove('hidden');
         el.classList.add('flex');
       }
@@ -1690,8 +1856,7 @@
         const filterNatSel = document.getElementById('filterLancNatureza');
         if (filterNatSel) {
           const prev = filterNatSel.value || 'ALL';
-          filterNatSel.innerHTML = `<option value="ALL">Todas as Naturezas</option>` +
-            (d.naturezas || []).map(n => `<option value="${n.id}">${escapeHtml(n.nome)}</option>`).join('');
+          filterNatSel.innerHTML = `<option value="ALL">Todas as Naturezas</option>` + (d.naturezas || []).map(n => `<option value="${n.id}">${escapeHtml(n.nome)}</option>`).join('');
           filterNatSel.value = prev;
         }
 
@@ -1703,7 +1868,7 @@
         if (concBankSel) {
           const prevBank = concBankSel.value || (d.bancos[0]?.id || '');
           concBankSel.innerHTML = bankOpts;
-          concBankSel.value = (d.bancos.some(b => b.id === prevBank)) ? prevBank : (d.bancos[0]?.id || '');
+          concBankSel.value = d.bancos.some(b => b.id === prevBank) ? prevBank : (d.bancos[0]?.id || '');
         }
 
         const contas = d.contabilidade?.contas || [];
@@ -1728,11 +1893,8 @@
       function onLancFluxoChange() {
         const fluxo = document.getElementById('lancFluxo').value;
         const d = getClientData();
-        const activeNats = (d.naturezas || []).filter(n => n.ativa !== false);
-        const preferred = activeNats.find(n => (fluxo === 'RECEBER' ? n.tipo === 'RECEITA' : n.tipo === 'DESPESA'));
-        if (preferred) {
-          document.getElementById('lancNatureza').value = preferred.id;
-        }
+        const preferred = (d.naturezas || []).filter(n => n.ativa !== false).find(n => (fluxo === 'RECEBER' ? n.tipo === 'RECEITA' : n.tipo === 'DESPESA'));
+        if (preferred) document.getElementById('lancNatureza').value = preferred.id;
       }
 
       // ==================== CLIENTES ====================
@@ -1752,12 +1914,7 @@
         const segmento = document.getElementById('cliSegmento').value.trim() || 'Geral';
         if (!nome) return;
         const id = `cli_${Date.now()}`;
-        state.clientes.push({
-          id,
-          nome,
-          segmento,
-          data: createDefaultClientData(nome, segmento)
-        });
+        state.clientes.push({ id, nome, segmento, data: createDefaultClientData(nome, segmento) });
         state.activeClientId = id;
         e.target.reset();
         closeModal('modalCliente');
@@ -1766,12 +1923,10 @@
         await pushToCloud(true);
       }
 
-      // ==================== LANÇAMENTOS (PAGAR / RECEBER) ====================
+      // ==================== LANÇAMENTOS ====================
       function setLancFilter(f) {
         activeLancFilter = f;
-        document.querySelectorAll('.lf-btn').forEach(b => {
-          b.className = 'lf-btn rounded-lg px-3 py-1.5 font-medium text-slate-300 hover:bg-slate-800/70';
-        });
+        document.querySelectorAll('.lf-btn').forEach(b => { b.className = 'lf-btn rounded-lg px-3 py-1.5 font-medium text-slate-300 hover:bg-slate-800/70'; });
         const el = document.getElementById(`lf${f}`);
         if (el) el.className = 'lf-btn rounded-lg bg-slate-800 px-3 py-1.5 font-semibold text-emerald-300';
         renderLancamentos();
@@ -1788,7 +1943,6 @@
         const valor = Math.abs(Number(document.getElementById('lancValor').value) || 0);
         const status = document.getElementById('lancStatus').value;
         const parcelas = Math.max(1, Math.min(60, parseInt(document.getElementById('lancParcelas').value, 10) || 1));
-
         if (!desc || valor <= 0) return;
 
         const eachVal = Number((valor / parcelas).toFixed(2));
@@ -1796,6 +1950,8 @@
           const parts = baseDate.split('-').map(Number);
           const dt = new Date(Date.UTC(parts[0], (parts[1] || 1) - 1 + i, parts[2] || 1));
           const iso = dt.toISOString().slice(0, 10);
+          const itemVal = i === parcelas - 1 ? Number((valor - eachVal * (parcelas - 1)).toFixed(2)) : eachVal;
+
           d.lancamentos.push({
             id: `lnc_${Date.now()}_${i}`,
             data: iso,
@@ -1804,34 +1960,21 @@
             naturezaId,
             bancoId,
             status: i === 0 ? status : 'PENDENTE',
-            valor: i === parcelas - 1 ? Number((valor - eachVal * (parcelas - 1)).toFixed(2)) : eachVal,
+            aprovacao: 'PENDENTE',
+            valor: itemVal,
             conciliado: false
           });
 
-          // Auto-create accounting entry if linked
           const nat = (d.naturezas || []).find(n => n.id === naturezaId);
           if (nat && nat.contaContabilId) {
-            const caixaId = 'acc_1101';
-            const itemVal = i === parcelas - 1 ? Number((valor - eachVal * (parcelas - 1)).toFixed(2)) : eachVal;
-            if (fluxo === 'RECEBER') {
-              d.contabilidade.lancamentosContabeis.push({
-                id: `lc_auto_${Date.now()}_${i}`,
-                data: iso,
-                historico: `${desc} (${nat.nome})`,
-                debitoId: caixaId,
-                creditoId: nat.contaContabilId,
-                valor: itemVal
-              });
-            } else {
-              d.contabilidade.lancamentosContabeis.push({
-                id: `lc_auto_${Date.now()}_${i}`,
-                data: iso,
-                historico: `${desc} (${nat.nome})`,
-                debitoId: nat.contaContabilId,
-                creditoId: caixaId,
-                valor: itemVal
-              });
-            }
+            d.contabilidade.lancamentosContabeis.push({
+              id: `lc_auto_${Date.now()}_${i}`,
+              data: iso,
+              historico: `${desc} (${nat.nome})`,
+              debitoId: fluxo === 'RECEBER' ? 'acc_1101' : nat.contaContabilId,
+              creditoId: fluxo === 'RECEBER' ? nat.contaContabilId : 'acc_1101',
+              valor: itemVal
+            });
           }
         }
 
@@ -1874,9 +2017,7 @@
           if (search) {
             const bankName = (d.bancos.find(b => b.id === l.bancoId)?.nome || '').toLowerCase();
             const natName = (d.naturezas.find(n => n.id === l.naturezaId)?.nome || '').toLowerCase();
-            if (!l.descricao.toLowerCase().includes(search) && !bankName.includes(search) && !natName.includes(search)) {
-              return false;
-            }
+            if (!l.descricao.toLowerCase().includes(search) && !bankName.includes(search) && !natName.includes(search)) return false;
           }
           return true;
         }).sort((a, b) => a.data.localeCompare(b.data));
@@ -1887,12 +2028,10 @@
         const tbody = document.getElementById('lancamentosTableBody');
         if (!tbody) return;
         const rows = getFilteredLancamentos();
-
         if (rows.length === 0) {
           tbody.innerHTML = `<tr><td colspan="9" class="py-6 text-center text-slate-400">Nenhum lançamento encontrado para os filtros selecionados.</td></tr>`;
           return;
         }
-
         tbody.innerHTML = rows.map(l => {
           const nat = d.naturezas.find(n => n.id === l.naturezaId);
           const bank = d.bancos.find(b => b.id === l.bancoId);
@@ -1900,21 +2039,15 @@
           const isRec = l.fluxo === 'RECEBER';
           const statusStyle = l.status === 'PAGO'
             ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-300'
-            : (l.status === 'VENCIDO'
-              ? 'border-rose-500/30 bg-rose-500/15 text-rose-300'
-              : 'border-amber-500/30 bg-amber-500/15 text-amber-300');
+            : (l.status === 'VENCIDO' ? 'border-rose-500/30 bg-rose-500/15 text-rose-300' : 'border-amber-500/30 bg-amber-500/15 text-amber-300');
 
           return `
             <tr class="hover:bg-slate-800/40">
               <td class="py-2.5 px-3 whitespace-nowrap">${formatDateBR(l.data)}</td>
               <td class="py-2.5 px-3 whitespace-nowrap">
-                <span class="rounded px-2 py-0.5 text-[11px] ${horizon === 'FUTURE' ? 'bg-blue-500/15 text-blue-300' : 'bg-slate-800 text-slate-300'}">
-                  ${horizon === 'FUTURE' ? 'Previsto' : 'Realizado'}
-                </span>
+                <span class="rounded px-2 py-0.5 text-[11px] ${horizon === 'FUTURE' ? 'bg-blue-500/15 text-blue-300' : 'bg-slate-800 text-slate-300'}">${horizon === 'FUTURE' ? 'Previsto' : 'Realizado'}</span>
               </td>
-              <td class="py-2.5 px-3 whitespace-nowrap font-semibold ${isRec ? 'text-emerald-400' : 'text-rose-400'}">
-                ${isRec ? '↑ Receber' : '↓ Pagar'}
-              </td>
+              <td class="py-2.5 px-3 whitespace-nowrap font-semibold ${isRec ? 'text-emerald-400' : 'text-rose-400'}">${isRec ? '↑ Receber' : '↓ Pagar'}</td>
               <td class="py-2.5 px-3 font-medium text-white">
                 ${escapeHtml(l.descricao)}
                 ${l.conciliado ? '<span class="ml-1.5 rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] text-emerald-300">Conciliado</span>' : ''}
@@ -1922,9 +2055,7 @@
               <td class="py-2.5 px-3 text-slate-300">${escapeHtml(nat?.nome || '-')}</td>
               <td class="py-2.5 px-3 text-slate-300">${escapeHtml(bank?.nome || '-')}</td>
               <td class="py-2.5 px-3 whitespace-nowrap">
-                <button onclick="AMFIN.toggleLancStatus('${l.id}')" class="rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${statusStyle}" title="Clique para alternar status">
-                  ${escapeHtml(l.status)}
-                </button>
+                <button onclick="AMFIN.toggleLancStatus('${l.id}')" class="rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${statusStyle}">${escapeHtml(l.status)}</button>
               </td>
               <td class="py-2.5 px-3 text-right font-semibold ${isRec ? 'text-emerald-300' : 'text-rose-300'}">${formatBRL(l.valor)}</td>
               <td class="py-2.5 px-3 text-center">
@@ -1935,13 +2066,12 @@
         }).join('');
       }
 
-      // ==================== NATUREZAS DE OPERAÇÃO ====================
+      // ==================== NATUREZAS ====================
       function openNaturezaModal(natId = null) {
         populateFormSelects();
         const d = getClientData();
         const editIdInput = document.getElementById('natEditId');
         const titleEl = document.getElementById('modalNaturezaTitle');
-
         if (natId) {
           const found = d.naturezas.find(n => n.id === natId);
           if (found) {
@@ -1969,30 +2099,20 @@
         e.preventDefault();
         const d = getClientData();
         const editId = document.getElementById('natEditId').value;
-        const codigo = document.getElementById('natCodigo').value.trim();
-        const nome = document.getElementById('natNome').value.trim();
-        const tipo = document.getElementById('natTipo').value;
-        const contaContabilId = document.getElementById('natContaContabil').value;
-        const ativa = document.getElementById('natAtiva').checked;
-
-        if (!nome) return;
-
+        const payload = {
+          codigo: document.getElementById('natCodigo').value.trim(),
+          nome: document.getElementById('natNome').value.trim(),
+          tipo: document.getElementById('natTipo').value,
+          contaContabilId: document.getElementById('natContaContabil').value,
+          ativa: document.getElementById('natAtiva').checked
+        };
+        if (!payload.nome) return;
         if (editId) {
           const idx = d.naturezas.findIndex(n => n.id === editId);
-          if (idx >= 0) {
-            d.naturezas[idx] = { ...d.naturezas[idx], codigo, nome, tipo, contaContabilId, ativa };
-          }
+          if (idx >= 0) d.naturezas[idx] = { ...d.naturezas[idx], ...payload };
         } else {
-          d.naturezas.push({
-            id: `nat_${Date.now()}`,
-            codigo,
-            nome,
-            tipo,
-            contaContabilId,
-            ativa
-          });
+          d.naturezas.push({ id: `nat_${Date.now()}`, ...payload });
         }
-
         closeModal('modalNatureza');
         renderAll();
         await pushToCloud(true);
@@ -2012,16 +2132,12 @@
         const tbody = document.getElementById('naturezasTableBody');
         if (!tbody) return;
         const contas = d.contabilidade?.contas || [];
-
         tbody.innerHTML = (d.naturezas || []).map(n => {
           const acc = contas.find(c => c.id === n.contaContabilId);
           const isActive = n.ativa !== false;
           const badgeTipo = n.tipo === 'RECEITA'
             ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-            : (n.tipo === 'DESPESA'
-              ? 'bg-rose-500/15 text-rose-300 border-rose-500/30'
-              : 'bg-slate-700/40 text-slate-300 border-slate-600/40');
-
+            : (n.tipo === 'DESPESA' ? 'bg-rose-500/15 text-rose-300 border-rose-500/30' : 'bg-slate-700/40 text-slate-300 border-slate-600/40');
           return `
             <tr class="hover:bg-slate-800/40">
               <td class="py-2.5 px-3 font-mono text-slate-300">${escapeHtml(n.codigo || '-')}</td>
@@ -2029,9 +2145,7 @@
               <td class="py-2.5 px-3"><span class="rounded-full border px-2.5 py-0.5 text-[11px] ${badgeTipo}">${escapeHtml(n.tipo)}</span></td>
               <td class="py-2.5 px-3 text-slate-300">${acc ? `${escapeHtml(acc.codigo)} - ${escapeHtml(acc.nome)}` : '<span class="text-slate-500">Não vinculada</span>'}</td>
               <td class="py-2.5 px-3">
-                <button onclick="AMFIN.toggleNaturezaAtiva('${n.id}')" class="rounded-full border px-2.5 py-0.5 text-[11px] ${isActive ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-300' : 'border-slate-600 bg-slate-800 text-slate-400'}">
-                  ${isActive ? 'Ativa' : 'Inativa'}
-                </button>
+                <button onclick="AMFIN.toggleNaturezaAtiva('${n.id}')" class="rounded-full border px-2.5 py-0.5 text-[11px] ${isActive ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-300' : 'border-slate-600 bg-slate-800 text-slate-400'}">${isActive ? 'Ativa' : 'Inativa'}</button>
               </td>
               <td class="py-2.5 px-3 text-center">
                 <button onclick="AMFIN.openNaturezaModal('${n.id}')" class="rounded border border-slate-700 bg-slate-800 px-2.5 py-1 text-[11px] text-slate-200 hover:bg-slate-700">Editar</button>
@@ -2044,10 +2158,8 @@
       // ==================== CONCILIAÇÃO BANCÁRIA (.TXT) ====================
       function parseDateFlexible(raw) {
         const s = String(raw || '').trim();
-        // DD/MM/YYYY or DD-MM-YYYY
         let m = s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/);
         if (m) return `${m[3]}-${m[2]}-${m[1]}`;
-        // YYYY-MM-DD
         m = s.match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})$/);
         if (m) return `${m[1]}-${m[2]}-${m[3]}`;
         return null;
@@ -2057,30 +2169,21 @@
         if (typeof raw === 'number') return raw;
         let s = String(raw || '').replace(/R\$/gi, '').replace(/\s+/g, '').trim();
         if (!s) return NaN;
-        if (s.includes(',') && s.includes('.')) {
-          s = s.replace(/\./g, '').replace(',', '.');
-        } else if (s.includes(',')) {
-          s = s.replace(',', '.');
-        }
+        if (s.includes(',') && s.includes('.')) s = s.replace(/\./g, '').replace(',', '.');
+        else if (s.includes(',')) s = s.replace(',', '.');
         return Number(s);
       }
 
       function parseTxtStatement(text) {
         const lines = String(text || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
         const parsed = [];
-
         lines.forEach((line, idx) => {
-          // Skip header-like lines
-          if (/^(data|date|dt|saldo anterior|total)/i.test(line) && !/\d{2,4}[\/\-]\d{2}[\/\-]\d{2,4}/.test(line)) {
-            return;
-          }
-
+          if (/^(data|date|dt|saldo anterior|total)/i.test(line) && !/\d{2,4}[\/\-]\d{2}[\/\-]\d{2,4}/.test(line)) return;
           let dateIso = null;
           let balanceVal = null;
           let amountVal = NaN;
           let desc = line;
 
-          // Extract explicit "Saldo: ..." if present
           const saldoMatch = line.match(/saldo\s*[:=]?\s*([+-]?R?\$?\s*[\d.,]+)/i);
           if (saldoMatch) {
             const bNum = parsePtNumber(saldoMatch[1]);
@@ -2088,31 +2191,19 @@
             line = line.replace(saldoMatch[0], '').trim();
           }
 
-          // Split by pipe, semicolon, tab or multiple spaces
           const parts = line.includes('|')
             ? line.split('|').map(p => p.trim()).filter(Boolean)
-            : (line.includes(';')
-              ? line.split(';').map(p => p.trim()).filter(Boolean)
-              : line.split(/\t+|\s{2,}/).map(p => p.trim()).filter(Boolean));
+            : (line.includes(';') ? line.split(';').map(p => p.trim()).filter(Boolean) : line.split(/\t+|\s{2,}/).map(p => p.trim()).filter(Boolean));
 
-          // Find date token
           for (let i = 0; i < parts.length; i++) {
             const dIso = parseDateFlexible(parts[i]);
-            if (dIso) {
-              dateIso = dIso;
-              parts.splice(i, 1);
-              break;
-            }
+            if (dIso) { dateIso = dIso; parts.splice(i, 1); break; }
           }
           if (!dateIso) {
             const anyDate = line.match(/(\d{2}[\/\-]\d{2}[\/\-]\d{4}|\d{4}[\/\-]\d{2}[\/\-]\d{2})/);
-            if (anyDate) {
-              dateIso = parseDateFlexible(anyDate[1]);
-              line = line.replace(anyDate[1], '').trim();
-            }
+            if (anyDate) { dateIso = parseDateFlexible(anyDate[1]); line = line.replace(anyDate[1], '').trim(); }
           }
 
-          // Find numeric amount token (prefer last numeric token that isn't balance)
           for (let i = parts.length - 1; i >= 0; i--) {
             const cleanedToken = parts[i].replace(/^(D|C|CR|DB|CRED|DEB)[:\s-]*/i, '');
             const num = parsePtNumber(cleanedToken);
@@ -2141,7 +2232,6 @@
           }
 
           desc = desc.replace(/^[\-–—|;:\s]+|[\-–—|;:\s]+$/g, '').trim() || `Movimentação ${idx + 1}`;
-
           if (dateIso && !Number.isNaN(amountVal)) {
             parsed.push({
               id: `ext_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 5)}`,
@@ -2155,7 +2245,6 @@
             });
           }
         });
-
         return parsed;
       }
 
@@ -2165,10 +2254,7 @@
         const reader = new FileReader();
         reader.onload = (e) => {
           const items = parseTxtStatement(e.target.result || '');
-          if (items.length === 0) {
-            showToast('Não foi possível identificar linhas válidas (data + valor) no arquivo .TXT.', true);
-            return;
-          }
+          if (!items.length) { showToast('Não foi possível identificar linhas válidas (data + valor) no arquivo .TXT.', true); return; }
           pendingTxtLines = items;
           renderTxtPreview(file.name, items);
         };
@@ -2192,7 +2278,6 @@
         const title = document.getElementById('txtPreviewTitle');
         const body = document.getElementById('txtPreviewBody');
         if (!box || !title || !body) return;
-
         title.textContent = `Pré-visualização: ${escapeHtml(fileName)} (${items.length} movimentações detectadas)`;
         body.innerHTML = items.map(it => `
           <tr>
@@ -2217,8 +2302,7 @@
         const bankId = document.getElementById('concBankSelect').value;
         if (!bankId) return;
         const d = getClientData();
-        const existing = d.extratoImportado[bankId] || [];
-        d.extratoImportado[bankId] = [...existing, ...pendingTxtLines];
+        d.extratoImportado[bankId] = [...(d.extratoImportado[bankId] || []), ...pendingTxtLines];
         pendingTxtLines = [];
         document.getElementById('txtPreviewBox')?.classList.add('hidden');
         const inp = document.getElementById('txtStatementInput');
@@ -2227,7 +2311,7 @@
         await pushToCloud(true);
       }
 
-      function onConcBankChange(bankId) {
+      function onConcBankChange() {
         selectedExtItemId = null;
         renderConciliacao();
       }
@@ -2246,8 +2330,7 @@
       async function reconcilePair(extId, lancId) {
         const bankId = document.getElementById('concBankSelect').value;
         const d = getClientData();
-        const extList = d.extratoImportado[bankId] || [];
-        const extItem = extList.find(x => x.id === extId);
+        const extItem = (d.extratoImportado[bankId] || []).find(x => x.id === extId);
         const lancItem = d.lancamentos.find(l => l.id === lancId);
         if (!extItem || !lancItem) return;
 
@@ -2282,7 +2365,6 @@
         const d = getClientData();
         const extItem = (d.extratoImportado[bankId] || []).find(x => x.id === extId);
         if (!extItem) return;
-
         const isCredit = Number(extItem.valor) >= 0;
         const defaultNat = (d.naturezas || []).find(n => (isCredit ? n.tipo === 'RECEITA' : n.tipo === 'DESPESA')) || d.naturezas[0];
         const newLancId = `lnc_conc_${Date.now()}`;
@@ -2295,10 +2377,10 @@
           naturezaId: defaultNat?.id || '',
           bancoId: bankId,
           status: 'PAGO',
+          aprovacao: 'APROVADO',
           valor: Math.abs(Number(extItem.valor)),
           conciliado: true
         });
-
         extItem.matchedLancId = newLancId;
         extItem.status = 'CONCILIADO';
         extItem.divergencia = '';
@@ -2333,71 +2415,55 @@
 
         const extContainer = document.getElementById('extStatementList');
         if (extContainer) {
-          if (extList.length === 0) {
-            extContainer.innerHTML = `<div class="rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-center text-xs text-slate-400">Nenhuma linha de extrato .TXT carregada para este banco/período.</div>`;
-          } else {
-            extContainer.innerHTML = extList.map(it => {
-              const isSel = selectedExtItemId === it.id;
-              const stClass = it.status === 'CONCILIADO'
-                ? 'border-emerald-500/40 bg-emerald-500/10'
-                : (it.status === 'DIVERGENCIA' ? 'border-rose-500/40 bg-rose-500/10' : 'border-slate-800 bg-slate-950/70');
-              return `
-                <div class="rounded-lg border p-3 text-xs space-y-2 ${stClass} ${isSel ? 'ring-2 ring-blue-400' : ''}">
-                  <div class="flex items-start justify-between gap-2">
-                    <div>
-                      <div class="font-semibold text-white">${escapeHtml(it.descricao)}</div>
-                      <div class="text-[11px] text-slate-400">${formatDateBR(it.data)} • Status: <span class="font-semibold">${it.status}</span></div>
-                      ${it.divergencia ? `<div class="text-[11px] text-rose-300">${escapeHtml(it.divergencia)}</div>` : ''}
+          extContainer.innerHTML = extList.length === 0
+            ? `<div class="rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-center text-xs text-slate-400">Nenhuma linha de extrato .TXT carregada para este banco/período.</div>`
+            : extList.map(it => {
+                const isSel = selectedExtItemId === it.id;
+                const stClass = it.status === 'CONCILIADO'
+                  ? 'border-emerald-500/40 bg-emerald-500/10'
+                  : (it.status === 'DIVERGENCIA' ? 'border-rose-500/40 bg-rose-500/10' : 'border-slate-800 bg-slate-950/70');
+                return `
+                  <div class="rounded-lg border p-3 text-xs space-y-2 ${stClass} ${isSel ? 'ring-2 ring-blue-400' : ''}">
+                    <div class="flex items-start justify-between gap-2">
+                      <div>
+                        <div class="font-semibold text-white">${escapeHtml(it.descricao)}</div>
+                        <div class="text-[11px] text-slate-400">${formatDateBR(it.data)} • Status: <span class="font-semibold">${it.status}</span></div>
+                        ${it.divergencia ? `<div class="text-[11px] text-rose-300">${escapeHtml(it.divergencia)}</div>` : ''}
+                      </div>
+                      <div class="text-right font-bold tabular-nums ${it.valor >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${formatBRL(it.valor)}</div>
                     </div>
-                    <div class="text-right font-bold tabular-nums ${it.valor >= 0 ? 'text-emerald-300' : 'text-rose-300'}">
-                      ${formatBRL(it.valor)}
+                    <div class="flex flex-wrap gap-1.5">
+                      ${it.status !== 'CONCILIADO' ? `
+                        <button onclick="AMFIN.selectExtForMatch('${it.id}')" class="rounded bg-blue-500/20 border border-blue-500/40 px-2 py-1 text-[11px] font-medium text-blue-200 hover:bg-blue-500/30">${isSel ? 'Selecionado (clique no ERP →)' : 'Comparar / Vincular'}</button>
+                        <button onclick="AMFIN.createMissingLancFromExt('${it.id}')" class="rounded bg-emerald-500/20 border border-emerald-500/40 px-2 py-1 text-[11px] font-medium text-emerald-200 hover:bg-emerald-500/30">+ Gerar Lançamento</button>
+                        <button onclick="AMFIN.flagExtDivergence('${it.id}')" class="rounded bg-rose-500/15 border border-rose-500/30 px-2 py-1 text-[11px] text-rose-200 hover:bg-rose-500/25">Divergência</button>
+                      ` : '<span class="text-[11px] text-emerald-300">✓ Conciliado</span>'}
                     </div>
                   </div>
-                  <div class="flex flex-wrap gap-1.5">
-                    ${it.status !== 'CONCILIADO' ? `
-                      <button onclick="AMFIN.selectExtForMatch('${it.id}')" class="rounded bg-blue-500/20 border border-blue-500/40 px-2 py-1 text-[11px] font-medium text-blue-200 hover:bg-blue-500/30">
-                        ${isSel ? 'Selecionado (clique no ERP →)' : 'Comparar / Vincular'}
-                      </button>
-                      <button onclick="AMFIN.createMissingLancFromExt('${it.id}')" class="rounded bg-emerald-500/20 border border-emerald-500/40 px-2 py-1 text-[11px] font-medium text-emerald-200 hover:bg-emerald-500/30">
-                        + Gerar Lançamento
-                      </button>
-                      <button onclick="AMFIN.flagExtDivergence('${it.id}')" class="rounded bg-rose-500/15 border border-rose-500/30 px-2 py-1 text-[11px] text-rose-200 hover:bg-rose-500/25">
-                        Divergência
-                      </button>
-                    ` : '<span class="text-[11px] text-emerald-300">✓ Conciliado</span>'}
-                  </div>
-                </div>
-              `;
-            }).join('');
-          }
+                `;
+              }).join('');
         }
 
         const erpContainer = document.getElementById('erpConcList');
         if (erpContainer) {
-          if (erpList.length === 0) {
-            erpContainer.innerHTML = `<div class="rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-center text-xs text-slate-400">Nenhum lançamento do ERP neste banco/período.</div>`;
-          } else {
-            erpContainer.innerHTML = erpList.map(l => {
-              const signed = l.fluxo === 'RECEBER' ? Number(l.valor) : -Number(l.valor);
-              const canMatch = Boolean(selectedExtItemId) && !l.conciliado;
-              return `
-                <div class="flex items-center justify-between gap-2 rounded-lg border p-3 text-xs ${l.conciliado ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-slate-800 bg-slate-950/70'}">
-                  <div>
-                    <div class="font-semibold text-white">${escapeHtml(l.descricao)}</div>
-                    <div class="text-[11px] text-slate-400">${formatDateBR(l.data)} • ${l.fluxo === 'RECEBER' ? 'Entrada' : 'Saída'} • ${l.status}</div>
+          erpContainer.innerHTML = erpList.length === 0
+            ? `<div class="rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-center text-xs text-slate-400">Nenhum lançamento do ERP neste banco/período.</div>`
+            : erpList.map(l => {
+                const signed = l.fluxo === 'RECEBER' ? Number(l.valor) : -Number(l.valor);
+                const canMatch = Boolean(selectedExtItemId) && !l.conciliado;
+                return `
+                  <div class="flex items-center justify-between gap-2 rounded-lg border p-3 text-xs ${l.conciliado ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-slate-800 bg-slate-950/70'}">
+                    <div>
+                      <div class="font-semibold text-white">${escapeHtml(l.descricao)}</div>
+                      <div class="text-[11px] text-slate-400">${formatDateBR(l.data)} • ${l.fluxo === 'RECEBER' ? 'Entrada' : 'Saída'} • ${l.status}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold tabular-nums ${signed >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${formatBRL(signed)}</span>
+                      ${canMatch ? `<button onclick="AMFIN.reconcilePair('${selectedExtItemId}', '${l.id}')" class="rounded-md bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-slate-950 hover:bg-emerald-400">Conciliar 1-Clique</button>` : (l.conciliado ? '<span class="rounded bg-emerald-500/15 px-2 py-0.5 text-[11px] text-emerald-300">Conciliado</span>' : '')}
+                    </div>
                   </div>
-                  <div class="flex items-center gap-2">
-                    <span class="font-bold tabular-nums ${signed >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${formatBRL(signed)}</span>
-                    ${canMatch ? `
-                      <button onclick="AMFIN.reconcilePair('${selectedExtItemId}', '${l.id}')" class="rounded-md bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-slate-950 hover:bg-emerald-400">
-                        Conciliar 1-Clique
-                      </button>
-                    ` : (l.conciliado ? '<span class="rounded bg-emerald-500/15 px-2 py-0.5 text-[11px] text-emerald-300">Conciliado</span>' : '')}
-                  </div>
-                </div>
-              `;
-            }).join('');
-          }
+                `;
+              }).join('');
         }
       }
 
@@ -2406,7 +2472,7 @@
         renderConciliacao();
       }
 
-      // ==================== CONTABILIDADE (PLANO, DIÁRIO, RAZÃO, BALANCETE/DRE) ====================
+      // ==================== CONTABILIDADE ====================
       async function saveContaContabil(e) {
         e.preventDefault();
         const d = getClientData();
@@ -2430,10 +2496,7 @@
         const debitoId = document.getElementById('lcDebito').value;
         const creditoId = document.getElementById('lcCredito').value;
         const valor = Math.abs(Number(document.getElementById('lcValor').value) || 0);
-        if (debitoId === creditoId) {
-          showToast('Escolha contas diferentes para Débito e Crédito.', true);
-          return;
-        }
+        if (debitoId === creditoId) { showToast('Escolha contas diferentes para Débito e Crédito.', true); return; }
         if (valor <= 0) return;
 
         d.contabilidade.lancamentosContabeis.push({
@@ -2444,7 +2507,6 @@
           creditoId,
           valor
         });
-
         e.target.reset();
         closeModal('modalLancamentoContabil');
         populateYearSelect();
@@ -2465,7 +2527,6 @@
         const acc = contas.find(c => c.id === accountId) || contas[0];
         const allLc = (d.contabilidade?.lancamentosContabeis || []).slice().sort((a, b) => a.data.localeCompare(b.data));
 
-        // Calculate opening balance prior to selected month/year
         let opening = Number(acc?.saldoInicial) || 0;
         const entries = [];
         let totalDeb = 0;
@@ -2486,21 +2547,12 @@
           const credVal = isCred ? Number(lc.valor) : 0;
           const signedDelta = acc?.natureza === 'CREDORA' ? (credVal - debVal) : (debVal - credVal);
 
-          if (isBeforePeriod) {
-            opening += signedDelta;
-            continue;
-          }
-
+          if (isBeforePeriod) { opening += signedDelta; continue; }
           if (!matchesPeriodAndHorizon(lc.data)) continue;
 
           totalDeb += debVal;
           totalCred += credVal;
-          entries.push({
-            ...lc,
-            debVal,
-            credVal,
-            contrapartidaId: isDeb ? lc.creditoId : lc.debitoId
-          });
+          entries.push({ ...lc, debVal, credVal, contrapartidaId: isDeb ? lc.creditoId : lc.debitoId });
         }
 
         let running = opening;
@@ -2508,11 +2560,7 @@
           const delta = acc?.natureza === 'CREDORA' ? (en.credVal - en.debVal) : (en.debVal - en.credVal);
           running += delta;
           const contra = contas.find(c => c.id === en.contrapartidaId);
-          return {
-            ...en,
-            contrapartidaNome: contra ? `${contra.codigo} - ${contra.nome}` : '-',
-            saldoAcumulado: running
-          };
+          return { ...en, contrapartidaNome: contra ? `${contra.codigo} - ${contra.nome}` : '-', saldoAcumulado: running };
         });
 
         return { acc, opening, totalDeb, totalCred, closing: running, rows };
@@ -2521,10 +2569,9 @@
       function renderContabilidade() {
         const d = getClientData();
         const contas = d.contabilidade?.contas || [];
-
-        // 1. Razão
         const selectedAccId = document.getElementById('razaoAccountSelect')?.value || contas[0]?.id;
         const ledger = computeAccountLedger(selectedAccId);
+
         const razaoSum = document.getElementById('razaoHeaderSummary');
         if (razaoSum) {
           razaoSum.innerHTML = `
@@ -2537,13 +2584,7 @@
 
         const razaoBody = document.getElementById('razaoTableBody');
         if (razaoBody) {
-          const openRow = `
-            <tr class="bg-slate-900/60 font-medium text-slate-300">
-              <td class="py-2 px-3">-</td>
-              <td class="py-2 px-3" colspan="4">Saldo Anterior do Período</td>
-              <td class="py-2 px-3 text-right font-bold text-white">${formatBRL(ledger.opening)}</td>
-            </tr>
-          `;
+          const openRow = `<tr class="bg-slate-900/60 font-medium text-slate-300"><td class="py-2 px-3">-</td><td class="py-2 px-3" colspan="4">Saldo Anterior do Período</td><td class="py-2 px-3 text-right font-bold text-white">${formatBRL(ledger.opening)}</td></tr>`;
           const entryRows = ledger.rows.map(r => `
             <tr class="hover:bg-slate-800/40">
               <td class="py-2 px-3 whitespace-nowrap">${formatDateBR(r.data)}</td>
@@ -2557,12 +2598,9 @@
           razaoBody.innerHTML = openRow + (entryRows || `<tr><td colspan="6" class="py-4 text-center text-slate-400">Sem movimentações contábeis neste período.</td></tr>`);
         }
 
-        // 2. Diário
         const diarioBody = document.getElementById('diarioTableBody');
         if (diarioBody) {
-          const diarioRows = (d.contabilidade?.lancamentosContabeis || [])
-            .filter(lc => matchesPeriodAndHorizon(lc.data))
-            .sort((a, b) => a.data.localeCompare(b.data));
+          const diarioRows = (d.contabilidade?.lancamentosContabeis || []).filter(lc => matchesPeriodAndHorizon(lc.data)).sort((a, b) => a.data.localeCompare(b.data));
           diarioBody.innerHTML = diarioRows.length === 0
             ? `<tr><td colspan="6" class="py-4 text-center text-slate-400">Nenhum lançamento no Livro Diário para o período.</td></tr>`
             : diarioRows.map(lc => {
@@ -2581,7 +2619,6 @@
               }).join('');
         }
 
-        // 3. Plano de Contas
         const planoBody = document.getElementById('planoTableBody');
         if (planoBody) {
           planoBody.innerHTML = contas.map(c => `
@@ -2594,12 +2631,13 @@
           `).join('');
         }
 
-        // 4. Balancete & DRE
-        const balBody = document.getElementById('balanceteTableBody');
-        let recTotal = 0;
-        let custoTotal = 0;
-        let despTotal = 0;
+        const ccList = document.getElementById('centrosCustoList');
+        if (ccList) {
+          ccList.innerHTML = (d.centrosCusto || []).map(cc => `<span class="rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1 text-slate-200">${escapeHtml(cc)}</span>`).join('');
+        }
 
+        const balBody = document.getElementById('balanceteTableBody');
+        let recTotal = 0, custoTotal = 0, despTotal = 0;
         if (balBody) {
           balBody.innerHTML = contas.map(c => {
             const lg = computeAccountLedger(c.id);
@@ -2623,22 +2661,10 @@
         const dreBox = document.getElementById('dreSummaryBox');
         if (dreBox) {
           dreBox.innerHTML = `
-            <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
-              <div class="text-slate-400">Receitas Contábeis</div>
-              <div class="mt-1 text-base font-bold text-emerald-300">${formatBRL(recTotal)}</div>
-            </div>
-            <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
-              <div class="text-slate-400">Custos</div>
-              <div class="mt-1 text-base font-bold text-amber-300">${formatBRL(custoTotal)}</div>
-            </div>
-            <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
-              <div class="text-slate-400">Despesas</div>
-              <div class="mt-1 text-base font-bold text-rose-300">${formatBRL(despTotal)}</div>
-            </div>
-            <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
-              <div class="text-slate-400">Resultado Gerencial</div>
-              <div class="mt-1 text-base font-bold ${resultadoLiquido >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${formatBRL(resultadoLiquido)}</div>
-            </div>
+            <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3"><div class="text-slate-400">Receitas Contábeis</div><div class="mt-1 text-base font-bold text-emerald-300">${formatBRL(recTotal)}</div></div>
+            <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3"><div class="text-slate-400">Custos</div><div class="mt-1 text-base font-bold text-amber-300">${formatBRL(custoTotal)}</div></div>
+            <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3"><div class="text-slate-400">Despesas</div><div class="mt-1 text-base font-bold text-rose-300">${formatBRL(despTotal)}</div></div>
+            <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3"><div class="text-slate-400">Resultado Gerencial</div><div class="mt-1 text-base font-bold ${resultadoLiquido >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${formatBRL(resultadoLiquido)}</div></div>
           `;
         }
       }
@@ -2710,11 +2736,7 @@
           }).join('');
         }
 
-        const invList = (d.investimentos || []).filter(inv => {
-          const refDate = inv.dataVencimento || inv.dataAplicacao;
-          return matchesPeriodAndHorizon(inv.dataAplicacao) || matchesPeriodAndHorizon(refDate);
-        });
-
+        const invList = (d.investimentos || []).filter(inv => matchesPeriodAndHorizon(inv.dataAplicacao) || matchesPeriodAndHorizon(inv.dataVencimento || inv.dataAplicacao));
         const totalApplied = invList.reduce((acc, i) => acc + (Number(i.valorAplicado) || 0), 0);
         const totalCurrent = invList.reduce((acc, i) => acc + (Number(i.valorAtual) || 0), 0);
         const totalGain = totalCurrent - totalApplied;
@@ -2732,12 +2754,7 @@
         if (byTypeGrid) {
           byTypeGrid.innerHTML = INVEST_TYPES.map(t => {
             const sum = invList.filter(i => i.tipo === t).reduce((a, b) => a + (Number(b.valorAtual) || 0), 0);
-            return `
-              <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-2.5">
-                <div class="truncate text-[11px] text-slate-400" title="${escapeHtml(t)}">${escapeHtml(t)}</div>
-                <div class="mt-0.5 font-semibold text-white">${formatBRL(sum)}</div>
-              </div>
-            `;
+            return `<div class="rounded-lg border border-slate-800 bg-slate-950/60 p-2.5"><div class="truncate text-[11px] text-slate-400">${escapeHtml(t)}</div><div class="mt-0.5 font-semibold text-white">${formatBRL(sum)}</div></div>`;
           }).join('');
         }
 
@@ -2768,7 +2785,7 @@
         }
       }
 
-      // ==================== RELATÓRIOS AUTOMÁTICOS (DASHBOARD & CHARTS) ====================
+      // ==================== DASHBOARD & CHARTS ====================
       function renderDashboard() {
         const d = getClientData();
         const filteredLancs = (d.lancamentos || []).filter(l => matchesPeriodAndHorizon(l.data));
@@ -2793,56 +2810,24 @@
         const investTotal = (d.investimentos || []).reduce((s, i) => s + (Number(i.valorAtual) || 0), 0);
 
         document.getElementById('kpiGrid').innerHTML = `
-          <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 tabular-nums">
-            <div class="text-xs text-slate-400">Entradas / Receitas</div>
-            <div class="mt-1 text-xl font-bold text-emerald-400">${formatBRL(entradas)}</div>
-          </div>
-          <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 tabular-nums">
-            <div class="text-xs text-slate-400">Saídas / Despesas</div>
-            <div class="mt-1 text-xl font-bold text-rose-400">${formatBRL(saidas)}</div>
-          </div>
-          <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 tabular-nums">
-            <div class="text-xs text-slate-400">Saldo Líquido do Período</div>
-            <div class="mt-1 text-xl font-bold ${saldoLiquido >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${formatBRL(saldoLiquido)}</div>
-          </div>
-          <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 tabular-nums">
-            <div class="text-xs text-slate-400">Caixa + Investimentos</div>
-            <div class="mt-1 text-xl font-bold text-blue-300">${formatBRL(caixaTotal + investTotal)}</div>
-          </div>
+          <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 tabular-nums"><div class="text-xs text-slate-400">Entradas / Receitas</div><div class="mt-1 text-xl font-bold text-emerald-400">${formatBRL(entradas)}</div></div>
+          <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 tabular-nums"><div class="text-xs text-slate-400">Saídas / Despesas</div><div class="mt-1 text-xl font-bold text-rose-400">${formatBRL(saidas)}</div></div>
+          <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 tabular-nums"><div class="text-xs text-slate-400">Saldo Líquido do Período</div><div class="mt-1 text-xl font-bold ${saldoLiquido >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${formatBRL(saldoLiquido)}</div></div>
+          <div class="rounded-xl border border-slate-800 bg-[#111827] p-4 tabular-nums"><div class="text-xs text-slate-400">Caixa + Investimentos</div><div class="mt-1 text-xl font-bold text-blue-300">${formatBRL(caixaTotal + investTotal)}</div></div>
         `;
 
         document.getElementById('kpiSubGrid').innerHTML = `
-          <div class="rounded-xl border border-slate-800 bg-[#111827] p-3.5 tabular-nums">
-            <div class="text-xs text-slate-400">A Receber em Aberto</div>
-            <div class="mt-1 text-base font-bold text-emerald-300">${formatBRL(aReceberAberto)}</div>
-          </div>
-          <div class="rounded-xl border border-slate-800 bg-[#111827] p-3.5 tabular-nums">
-            <div class="text-xs text-slate-400">A Pagar em Aberto</div>
-            <div class="mt-1 text-base font-bold text-rose-300">${formatBRL(aPagarAberto)}</div>
-          </div>
-          <div class="rounded-xl border border-slate-800 bg-[#111827] p-3.5 tabular-nums">
-            <div class="text-xs text-slate-400">Saldo Bancário Total</div>
-            <div class="mt-1 text-base font-bold text-white">${formatBRL(caixaTotal)}</div>
-          </div>
-          <div class="rounded-xl border border-slate-800 bg-[#111827] p-3.5 tabular-nums">
-            <div class="text-xs text-slate-400">Total Investido (Atual)</div>
-            <div class="mt-1 text-base font-bold text-blue-300">${formatBRL(investTotal)}</div>
-          </div>
+          <div class="rounded-xl border border-slate-800 bg-[#111827] p-3.5 tabular-nums"><div class="text-xs text-slate-400">A Receber em Aberto</div><div class="mt-1 text-base font-bold text-emerald-300">${formatBRL(aReceberAberto)}</div></div>
+          <div class="rounded-xl border border-slate-800 bg-[#111827] p-3.5 tabular-nums"><div class="text-xs text-slate-400">A Pagar em Aberto</div><div class="mt-1 text-base font-bold text-rose-300">${formatBRL(aPagarAberto)}</div></div>
+          <div class="rounded-xl border border-slate-800 bg-[#111827] p-3.5 tabular-nums"><div class="text-xs text-slate-400">Saldo Bancário Total</div><div class="mt-1 text-base font-bold text-white">${formatBRL(caixaTotal)}</div></div>
+          <div class="rounded-xl border border-slate-800 bg-[#111827] p-3.5 tabular-nums"><div class="text-xs text-slate-400">Total Investido (Atual)</div><div class="mt-1 text-base font-bold text-blue-300">${formatBRL(investTotal)}</div></div>
         `;
 
-        // Natureza summary table
         const natSummary = (d.naturezas || []).map(n => {
           const items = filteredLancs.filter(l => l.naturezaId === n.id);
           const rec = items.filter(x => x.fluxo === 'RECEBER').reduce((s, x) => s + Number(x.valor), 0);
           const pag = items.filter(x => x.fluxo === 'PAGAR').reduce((s, x) => s + Number(x.valor), 0);
-          return {
-            nome: n.nome,
-            tipo: n.tipo,
-            qtd: items.length,
-            rec,
-            pag,
-            liq: rec - pag
-          };
+          return { nome: n.nome, tipo: n.tipo, qtd: items.length, rec, pag, liq: rec - pag };
         });
 
         document.getElementById('dashboardNaturezaTable').innerHTML = natSummary.map(row => `
@@ -2856,10 +2841,8 @@
           </tr>
         `).join('');
 
-        // Charts
         if (typeof Chart === 'undefined') return;
 
-        // Group by YYYY-MM
         const mapYM = {};
         filteredLancs.forEach(l => {
           const ym = (l.data || today).slice(0, 7);
@@ -2886,10 +2869,7 @@
           type: 'doughnut',
           data: {
             labels: natSummary.map(x => x.nome),
-            datasets: [{
-              data: natSummary.map(x => x.rec + x.pag),
-              backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#f43f5e', '#8b5cf6', '#06b6d4']
-            }]
+            datasets: [{ data: natSummary.map(x => x.rec + x.pag), backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#f43f5e', '#8b5cf6', '#06b6d4'] }]
           },
           options: { ...chartOptions(), scales: {} }
         });
@@ -2910,11 +2890,7 @@
           type: 'bar',
           data: {
             labels: ['Saldo Bancário', 'Investimentos (Atual)'],
-            datasets: [{
-              label: 'Valor (R$)',
-              data: [caixaTotal, investTotal],
-              backgroundColor: ['#3b82f6', '#10b981']
-            }]
+            datasets: [{ label: 'Valor (R$)', data: [caixaTotal, investTotal], backgroundColor: ['#3b82f6', '#10b981'] }]
           },
           options: chartOptions()
         });
@@ -2924,9 +2900,7 @@
         return {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: { labels: { color: '#cbd5e1', font: { size: 11 } } }
-          },
+          plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 11 } } } },
           scales: {
             x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: 'rgba(148,163,184,0.1)' } },
             y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: 'rgba(148,163,184,0.1)' } }
@@ -2937,43 +2911,28 @@
       function upsertChart(canvasId, config) {
         const canvas = document.getElementById(canvasId);
         if (!canvas) return;
-        if (charts[canvasId]) {
-          charts[canvasId].destroy();
-        }
+        if (charts[canvasId]) charts[canvasId].destroy();
         charts[canvasId] = new Chart(canvas.getContext('2d'), config);
       }
 
       // ==================== EXPORT EXCEL (.XLSX & UTF-8 BOM CSV) ====================
       function exportToXlsx(filename, sheetsObj) {
-        if (typeof XLSX === 'undefined') {
-          showToast('Biblioteca XLSX indisponível no momento; use a exportação CSV.', true);
-          return;
-        }
+        if (typeof XLSX === 'undefined') { showToast('Biblioteca XLSX indisponível no momento; use a exportação CSV.', true); return; }
         const wb = XLSX.utils.book_new();
         Object.entries(sheetsObj).forEach(([sheetName, rows]) => {
           const safeRows = Array.isArray(rows) && rows.length > 0 ? rows : [{ Aviso: 'Sem registros para exportar' }];
-          const ws = XLSX.utils.json_to_sheet(safeRows);
-          XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31));
+          XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(safeRows), sheetName.slice(0, 31));
         });
         XLSX.writeFile(wb, filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`);
         showToast(`Arquivo ${filename}.xlsx exportado!`);
       }
 
       function exportToCsvPt(filename, rows) {
-        if (!rows || !rows.length) {
-          showToast('Sem dados para exportar em CSV.', true);
-          return;
-        }
+        if (!rows || !rows.length) { showToast('Sem dados para exportar em CSV.', true); return; }
         const headers = Object.keys(rows[0]);
         const sep = ';';
-        const escapeCell = (v) => {
-          const s = String(v ?? '').replace(/"/g, '""');
-          return `"${s}"`;
-        };
-        const lines = [
-          headers.map(escapeCell).join(sep),
-          ...rows.map(r => headers.map(h => escapeCell(r[h])).join(sep))
-        ];
+        const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+        const lines = [headers.map(esc).join(sep), ...rows.map(r => headers.map(h => esc(r[h])).join(sep))];
         const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -2983,7 +2942,7 @@
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
-        showToast(`Arquivo CSV exportado para Excel!`);
+        showToast('Arquivo CSV exportado para Excel!');
       }
 
       function buildLancamentosExportRows() {
@@ -3001,12 +2960,8 @@
         }));
       }
 
-      function exportLancamentosXlsx() {
-        exportToXlsx(`AMFIN_Lancamentos_${todayISO()}`, { Lancamentos: buildLancamentosExportRows() });
-      }
-      function exportLancamentosCsv() {
-        exportToCsvPt(`AMFIN_Lancamentos_${todayISO()}`, buildLancamentosExportRows());
-      }
+      function exportLancamentosXlsx() { exportToXlsx(`AMFIN_Lancamentos_${todayISO()}`, { Lancamentos: buildLancamentosExportRows() }); }
+      function exportLancamentosCsv() { exportToCsvPt(`AMFIN_Lancamentos_${todayISO()}`, buildLancamentosExportRows()); }
 
       function exportDashboardXlsx() {
         const d = getClientData();
@@ -3017,11 +2972,9 @@
           const pag = items.filter(x => x.fluxo === 'PAGAR').reduce((s, x) => s + Number(x.valor), 0);
           return { Natureza: n.nome, Tipo: n.tipo, Qtd: items.length, Entradas: rec, Saidas: pag, Saldo: rec - pag };
         });
-        exportToXlsx(`AMFIN_Relatorios_${todayISO()}`, {
-          Por_Natureza: natRows,
-          Lancamentos_Periodo: buildLancamentosExportRows()
-        });
+        exportToXlsx(`AMFIN_Relatorios_${todayISO()}`, { Por_Natureza: natRows, Lancamentos_Periodo: buildLancamentosExportRows() });
       }
+
       function exportDashboardCsv() {
         const d = getClientData();
         const filtered = (d.lancamentos || []).filter(l => matchesPeriodAndHorizon(l.data));
@@ -3047,12 +3000,9 @@
           Divergencia: x.divergencia || ''
         }));
       }
-      function exportConciliacaoXlsx() {
-        exportToXlsx(`AMFIN_Conciliacao_${todayISO()}`, { Conciliacao: buildConciliacaoRows() });
-      }
-      function exportConciliacaoCsv() {
-        exportToCsvPt(`AMFIN_Conciliacao_${todayISO()}`, buildConciliacaoRows());
-      }
+
+      function exportConciliacaoXlsx() { exportToXlsx(`AMFIN_Conciliacao_${todayISO()}`, { Conciliacao: buildConciliacaoRows() }); }
+      function exportConciliacaoCsv() { exportToCsvPt(`AMFIN_Conciliacao_${todayISO()}`, buildConciliacaoRows()); }
 
       function buildRazaoRows() {
         const d = getClientData();
@@ -3068,20 +3018,17 @@
           Saldo_Acumulado: r.saldoAcumulado
         }));
       }
+
       function exportContabilidadeXlsx() {
         const d = getClientData();
         const bal = (d.contabilidade?.contas || []).map(c => {
           const lg = computeAccountLedger(c.id);
           return { Codigo: c.codigo, Conta: c.nome, Grupo: c.grupo, Saldo_Anterior: lg.opening, Debitos: lg.totalDeb, Creditos: lg.totalCred, Saldo_Final: lg.closing };
         });
-        exportToXlsx(`AMFIN_Contabilidade_${todayISO()}`, {
-          Livro_Razao: buildRazaoRows(),
-          Balancete: bal
-        });
+        exportToXlsx(`AMFIN_Contabilidade_${todayISO()}`, { Livro_Razao: buildRazaoRows(), Balancete: bal });
       }
-      function exportContabilidadeCsv() {
-        exportToCsvPt(`AMFIN_Livro_Razao_${todayISO()}`, buildRazaoRows());
-      }
+
+      function exportContabilidadeCsv() { exportToCsvPt(`AMFIN_Livro_Razao_${todayISO()}`, buildRazaoRows()); }
 
       function buildInvestRows() {
         const d = getClientData();
@@ -3096,23 +3043,14 @@
           Resultado: (Number(i.valorAtual) || 0) - (Number(i.valorAplicado) || 0)
         }));
       }
+
       function exportBancariaInvestimentosXlsx() {
         const d = getClientData();
-        const banks = (d.bancos || []).map(b => ({
-          Banco: b.nome,
-          Agencia: b.agencia,
-          Conta: b.conta,
-          Saldo_Inicial: Number(b.saldoInicial) || 0,
-          Saldo_Atual: getBankCurrentBalance(b)
-        }));
-        exportToXlsx(`AMFIN_Bancos_Investimentos_${todayISO()}`, {
-          Contas_Bancarias: banks,
-          Investimentos: buildInvestRows()
-        });
+        const banks = (d.bancos || []).map(b => ({ Banco: b.nome, Agencia: b.agencia, Conta: b.conta, Saldo_Inicial: Number(b.saldoInicial) || 0, Saldo_Atual: getBankCurrentBalance(b) }));
+        exportToXlsx(`AMFIN_Bancos_Investimentos_${todayISO()}`, { Contas_Bancarias: banks, Investimentos: buildInvestRows() });
       }
-      function exportBancariaInvestimentosCsv() {
-        exportToCsvPt(`AMFIN_Investimentos_${todayISO()}`, buildInvestRows());
-      }
+
+      function exportBancariaInvestimentosCsv() { exportToCsvPt(`AMFIN_Investimentos_${todayISO()}`, buildInvestRows()); }
 
       // ==================== RENDER ALL ====================
       function renderClientSelect() {
@@ -3121,18 +3059,29 @@
         sel.innerHTML = state.clientes.map(c => `<option value="${c.id}" ${c.id === state.activeClientId ? 'selected' : ''}>${escapeHtml(c.nome)}</option>`).join('');
       }
 
+      function renderSessionBadge() {
+        const badge = document.getElementById('activeSessionBadge');
+        if (!badge) return;
+        const s = state.session || { user: 'master', role: 'MASTER' };
+        badge.textContent = `Sessão: ${s.user} (${s.role})`;
+      }
+
       function renderAll() {
         renderClientSelect();
+        renderSessionBadge();
         document.getElementById('filterMonth').value = state.period.month;
         document.getElementById('filterYear').value = state.period.year;
         updatePeriodBadge();
         populateFormSelects();
         renderDashboard();
         renderLancamentos();
+        renderAprovacao();
+        renderBatchLotes();
         renderNaturezas();
         renderConciliacao();
         renderContabilidade();
         renderBancariaInvestimentos();
+        renderAcessos();
       }
 
       async function init() {
@@ -3150,6 +3099,13 @@
         switchContabSubtab,
         openModal,
         closeModal,
+        openLoginModal,
+        handleLogin,
+        saveAccessUser,
+        toggleAccessUser,
+        setApprovalStatus,
+        refreshBatchPreview,
+        generateBatchTxt,
         openCloudModal,
         saveCloudConfig,
         disableCloud,
